@@ -1,5 +1,5 @@
 package UI;
-
+import constraints.*;
 public class login extends javax.swing.JFrame {
 
     public login() {
@@ -35,48 +35,48 @@ public class login extends javax.swing.JFrame {
         setSize(new java.awt.Dimension(800, 500));
         getContentPane().setLayout(null);
 
-        backgroundPanel.setBackground(new java.awt.Color(0, 102, 102));
+        backgroundPanel.setBackground(colors.primary);
         backgroundPanel.setForeground(new java.awt.Color(0, 255, 102));
         backgroundPanel.setMaximumSize(new java.awt.Dimension(750, 550));
         backgroundPanel.setMinimumSize(new java.awt.Dimension(750, 550));
         backgroundPanel.setPreferredSize(new java.awt.Dimension(750, 550));
 
-        backgroundLoginPanel.setBackground(new java.awt.Color(255, 255, 255));
-        backgroundLoginPanel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 102, 102), 3, true));
+        backgroundLoginPanel.setBackground(colors.secondary);
+        backgroundLoginPanel.setBorder(new javax.swing.border.LineBorder(colors.primary, 3, true));
         backgroundLoginPanel.setMaximumSize(new java.awt.Dimension(450, 550));
         backgroundLoginPanel.setPreferredSize(new java.awt.Dimension(450, 550));
 
-        usernameField.setBackground(new java.awt.Color(255, 255, 255));
-        usernameField.setForeground(new java.awt.Color(0, 0, 0));
-        usernameField.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 102, 102), 2, true));
+        usernameField.setBackground(colors.secondary);
+        usernameField.setForeground(colors.textWithSecondaryBg);
+        usernameField.setBorder(new javax.swing.border.LineBorder(colors.primary, 2, true));
         usernameField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 usernameFieldActionPerformed(evt);
             }
         });
 
-        passwordField.setBackground(new java.awt.Color(255, 255, 255));
-        passwordField.setForeground(new java.awt.Color(0, 0, 0));
-        passwordField.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 102, 102), 2, true));
+        passwordField.setBackground(colors.secondary);
+        passwordField.setForeground(colors.textWithSecondaryBg);
+        passwordField.setBorder(new javax.swing.border.LineBorder(colors.primary, 2, true));
 
-        loginButton.setBackground(new java.awt.Color(0, 102, 102));
+        loginButton.setBackground(colors.primary);
         loginButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        loginButton.setForeground(new java.awt.Color(255, 255, 255));
+        loginButton.setForeground(colors.secondary);
         loginButton.setText("Log In");
 
-        loginLabel.setBackground(new java.awt.Color(255, 255, 255));
+        loginLabel.setBackground(colors.secondary);
         loginLabel.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        loginLabel.setForeground(new java.awt.Color(0, 102, 102));
+        loginLabel.setForeground(colors.primary);
         loginLabel.setText("Login");
 
-        usernameLabel.setBackground(new java.awt.Color(255, 255, 255));
+        usernameLabel.setBackground(colors.secondary);
         usernameLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        usernameLabel.setForeground(new java.awt.Color(0, 0, 0));
+        usernameLabel.setForeground(colors.textWithSecondaryBg);
         usernameLabel.setText("Username");
 
-        passwordLabel.setBackground(new java.awt.Color(255, 255, 255));
+        passwordLabel.setBackground(colors.secondary);
         passwordLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        passwordLabel.setForeground(new java.awt.Color(0, 0, 0));
+        passwordLabel.setForeground(colors.textWithSecondaryBg);
         passwordLabel.setText("Password");
 
         javax.swing.GroupLayout backgroundLoginPanelLayout = new javax.swing.GroupLayout(backgroundLoginPanel);
@@ -118,34 +118,34 @@ public class login extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        topLeftLabel.setBackground(new java.awt.Color(0, 102, 102));
+        topLeftLabel.setBackground(colors.primary);
         topLeftLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        topLeftLabel.setForeground(new java.awt.Color(255, 255, 255));
+        topLeftLabel.setForeground(colors.secondary);
         topLeftLabel.setText("POS");
 
-        welcomeLabel.setBackground(new java.awt.Color(0, 102, 102));
+        welcomeLabel.setBackground(colors.primary);
         welcomeLabel.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        welcomeLabel.setForeground(new java.awt.Color(255, 255, 255));
+        welcomeLabel.setForeground(colors.secondary);
         welcomeLabel.setText("Welcome");
 
-        subtitle.setBackground(new java.awt.Color(0, 102, 102));
+        subtitle.setBackground(colors.primary);
         subtitle.setFont(new java.awt.Font("Lucida Calligraphy", 2, 18)); // NOI18N
-        subtitle.setForeground(new java.awt.Color(255, 255, 255));
+        subtitle.setForeground(colors.secondary);
         subtitle.setText("A Project of OOP");
 
-        memeberLabel.setBackground(new java.awt.Color(0, 102, 102));
+        memeberLabel.setBackground(colors.primary);
         memeberLabel.setFont(new java.awt.Font("Microsoft Himalaya", 2, 18)); // NOI18N
-        memeberLabel.setForeground(new java.awt.Color(255, 255, 255));
+        memeberLabel.setForeground(colors.secondary);
         memeberLabel.setText("AMNA ASHRAF  -  ");
 
-        memeberlabel.setBackground(new java.awt.Color(0, 102, 102));
+        memeberlabel.setBackground(colors.primary);
         memeberlabel.setFont(new java.awt.Font("Microsoft Himalaya", 2, 18)); // NOI18N
-        memeberlabel.setForeground(new java.awt.Color(255, 255, 255));
+        memeberlabel.setForeground(colors.secondary);
         memeberlabel.setText("SULEMAN GUL  -  041");
 
-        memberlabel.setBackground(new java.awt.Color(0, 102, 102));
+        memberlabel.setBackground(colors.primary);
         memberlabel.setFont(new java.awt.Font("Microsoft Himalaya", 2, 18)); // NOI18N
-        memberlabel.setForeground(new java.awt.Color(255, 255, 255));
+        memberlabel.setForeground(colors.secondary);
         memberlabel.setText("MUHAMMAD ANAS  -  068");
 
         javax.swing.GroupLayout backgroundPanelLayout = new javax.swing.GroupLayout(backgroundPanel);
