@@ -1,6 +1,12 @@
 package raven.application.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.Timer;
+import logic.AuthService;
 import net.miginfocom.swing.MigLayout;
 import raven.application.Application;
 
@@ -10,6 +16,8 @@ import raven.application.Application;
  */
 public class LoginForm extends javax.swing.JPanel {
 
+    private JLabel lbError;
+
     public LoginForm() {
         initComponents();
         init();
@@ -18,9 +26,8 @@ public class LoginForm extends javax.swing.JPanel {
     private void init() {
         setLayout(new MigLayout("al center center"));
 
-        lbTitle.putClientProperty(FlatClientProperties.STYLE, ""
-                + "font:$h1.font");
-        
+        lbTitle.putClientProperty(FlatClientProperties.STYLE, "font:$h1.font");
+
         txtPass.putClientProperty(FlatClientProperties.STYLE, ""
                 + "showRevealButton:true;"
                 + "showCapsLock:true");
@@ -29,6 +36,49 @@ public class LoginForm extends javax.swing.JPanel {
                 + "focusWidth:0");
         txtUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "User Name");
         txtPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
+
+        // Enhanced Error Message Label
+        lbError = new JLabel();
+        lbError.setForeground(new Color(255, 50, 50)); // Modern red
+        lbError.setFont(new Font("Arial", Font.BOLD, 12));
+        lbError.setIcon(new ImageIcon(getClass().getResource("warning.png"))); // Add an icon
+        lbError.setVisible(false);
+
+        panelLogin1.add(lbError, "gapy 5, wrap"); // Adds error message in layout
+    }
+
+    private void showError(String message) {
+        lbError.setText("<html><span style='color:red; font-weight:bold;'>" + message + "</span></html>");
+        lbError.setVisible(true);
+
+        // Add input listeners to clear error on new input
+        addInputListeners();
+
+        // Smooth fade-in effect
+        new Timer(10, e -> lbError.setForeground(new Color(255, 0, 0, Math.min(255, lbError.getForeground().getAlpha() + 25)))).start();
+    }
+
+    private void addInputListeners() {
+        javax.swing.event.DocumentListener dl = new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                clearError();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                clearError();
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                clearError();
+            }
+
+            private void clearError() {
+                lbError.setVisible(false);
+            }
+        };
+
+        txtUser.getDocument().addDocumentListener(dl);
+        txtPass.getDocument().addDocumentListener(dl);
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +132,17 @@ public class LoginForm extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
-        Application.login();
+        String username = txtUser.getText();
+        String password = new String(txtPass.getPassword());
+
+        if (AuthService.authenticate(username, password)) {
+            lbError.setVisible(false);
+            Application.login();
+        } else {
+            lbError.setVisible(true);
+            showError("Invalid username or password");
+            txtPass.setText("");
+        }
     }//GEN-LAST:event_cmdLoginActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
