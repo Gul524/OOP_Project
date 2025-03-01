@@ -17,9 +17,10 @@ import raven.application.Application;
  */
 public class LoginForm extends javax.swing.JPanel {
 
-    ImageIcon loadingIcon = new ImageIcon(getClass().getResource("loading.gif"));
+    ImageIcon loadingIcon = new ImageIcon(getClass().getResource("Loader.gif"));
     private JLabel lbError;
-
+    private JLabel lbLoading;
+    
     public LoginForm() {
         initComponents();
         init();
@@ -103,7 +104,6 @@ public class LoginForm extends javax.swing.JPanel {
         lbPass = new javax.swing.JLabel();
         txtPass = new javax.swing.JPasswordField();
         cmdLogin = new javax.swing.JButton();
-        lbLoading = new javax.swing.JLabel();
 
         lbTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lbTitle.setText("Login");
@@ -124,7 +124,6 @@ public class LoginForm extends javax.swing.JPanel {
             }
         });
         panelLogin1.add(cmdLogin);
-        panelLogin1.add(lbLoading);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -139,8 +138,8 @@ public class LoginForm extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(68, 68, 68)
-                .addComponent(panelLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(66, Short.MAX_VALUE))
+                .addComponent(panelLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(54, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -196,7 +195,6 @@ public class LoginForm extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdLogin;
-    private javax.swing.JLabel lbLoading;
     private javax.swing.JLabel lbPass;
     private javax.swing.JLabel lbTitle;
     private javax.swing.JLabel lbUser;
