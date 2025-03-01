@@ -10,20 +10,21 @@ public class login extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        backgroundPanel = new javax.swing.JPanel();
-        backgroundLoginPanel = new javax.swing.JPanel();
-        usernameField = new javax.swing.JTextField();
-        passwordField = new javax.swing.JPasswordField();
-        loginButton = new javax.swing.JButton();
-        loginLabel = new javax.swing.JLabel();
-        usernameLabel = new javax.swing.JLabel();
-        passwordLabel = new javax.swing.JLabel();
-        topLeftLabel = new javax.swing.JLabel();
-        welcomeLabel = new javax.swing.JLabel();
-        subtitle = new javax.swing.JLabel();
-        memeberLabel = new javax.swing.JLabel();
-        memeberlabel = new javax.swing.JLabel();
-        memberlabel = new javax.swing.JLabel();
+        javax.swing.JPanel backgroundPanel = new javax.swing.JPanel();
+        // Variables declaration - do not modify//GEN-BEGIN:variables
+        javax.swing.JPanel backgroundLoginPanel = new javax.swing.JPanel();
+        javax.swing.JTextField usernameField = new javax.swing.JTextField();
+        javax.swing.JPasswordField passwordField = new javax.swing.JPasswordField();
+        javax.swing.JButton loginButton = new javax.swing.JButton();
+        javax.swing.JLabel loginLabel = new javax.swing.JLabel();
+        javax.swing.JLabel usernameLabel = new javax.swing.JLabel();
+        javax.swing.JLabel passwordLabel = new javax.swing.JLabel();
+        javax.swing.JLabel topLeftLabel = new javax.swing.JLabel();
+        javax.swing.JLabel welcomeLabel = new javax.swing.JLabel();
+        javax.swing.JLabel subtitle = new javax.swing.JLabel();
+        javax.swing.JLabel memeberLabel = new javax.swing.JLabel();
+        javax.swing.JLabel memeberlabel1 = new javax.swing.JLabel();
+        javax.swing.JLabel memberlabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("loginFrame");
@@ -32,11 +33,10 @@ public class login extends javax.swing.JFrame {
         setMaximumSize(new java.awt.Dimension(2147, 2147));
         setPreferredSize(new java.awt.Dimension(750, 550));
         setResizable(false);
-        setSize(new java.awt.Dimension(800, 500));
+        setSize(new java.awt.Dimension(750, 550));
         getContentPane().setLayout(null);
 
         backgroundPanel.setBackground(colors.primary);
-        backgroundPanel.setForeground(new java.awt.Color(0, 255, 102));
         backgroundPanel.setMaximumSize(new java.awt.Dimension(750, 550));
         backgroundPanel.setMinimumSize(new java.awt.Dimension(750, 550));
         backgroundPanel.setPreferredSize(new java.awt.Dimension(750, 550));
@@ -60,13 +60,13 @@ public class login extends javax.swing.JFrame {
         passwordField.setBorder(new javax.swing.border.LineBorder(colors.primary, 2, true));
 
         loginButton.setBackground(colors.primary);
-        loginButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        loginButton.setForeground(colors.secondary);
+        loginButton.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        loginButton.setForeground(colors.textWithPrimaryBg);
         loginButton.setText("Log In");
 
         loginLabel.setBackground(colors.secondary);
         loginLabel.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        loginLabel.setForeground(colors.primary);
+        loginLabel.setForeground(colors.textWithSecondaryBg);
         loginLabel.setText("Login");
 
         usernameLabel.setBackground(colors.secondary);
@@ -120,33 +120,33 @@ public class login extends javax.swing.JFrame {
 
         topLeftLabel.setBackground(colors.primary);
         topLeftLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        topLeftLabel.setForeground(colors.secondary);
+        topLeftLabel.setForeground(colors.textWithPrimaryBg);
         topLeftLabel.setText("POS");
 
         welcomeLabel.setBackground(colors.primary);
         welcomeLabel.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        welcomeLabel.setForeground(colors.secondary);
+        welcomeLabel.setForeground(colors.textWithPrimaryBg);
         welcomeLabel.setText("Welcome");
 
         subtitle.setBackground(colors.primary);
-        subtitle.setFont(new java.awt.Font("Lucida Calligraphy", 2, 18)); // NOI18N
-        subtitle.setForeground(colors.secondary);
+        subtitle.setFont(new java.awt.Font("Lucida Calligraphy", 3, 18)); // NOI18N
+        subtitle.setForeground(colors.textWithPrimaryBg);
         subtitle.setText("A Project of OOP");
 
         memeberLabel.setBackground(colors.primary);
-        memeberLabel.setFont(new java.awt.Font("Microsoft Himalaya", 2, 18)); // NOI18N
-        memeberLabel.setForeground(colors.secondary);
+        memeberLabel.setFont(new java.awt.Font("Microsoft Himalaya", 3, 20)); // NOI18N
+        memeberLabel.setForeground(colors.textWithPrimaryBg);
         memeberLabel.setText("AMNA ASHRAF  -  ");
 
-        memeberlabel.setBackground(colors.primary);
-        memeberlabel.setFont(new java.awt.Font("Microsoft Himalaya", 2, 18)); // NOI18N
-        memeberlabel.setForeground(colors.secondary);
-        memeberlabel.setText("SULEMAN GUL  -  041");
+        memeberlabel1.setBackground(colors.primary);
+        memeberlabel1.setFont(new java.awt.Font("Microsoft Himalaya", 3, 20)); // NOI18N
+        memeberlabel1.setForeground(colors.textWithPrimaryBg);
+        memeberlabel1.setText("SULEMAN GUL  -  041");
 
-        memberlabel.setBackground(colors.primary);
-        memberlabel.setFont(new java.awt.Font("Microsoft Himalaya", 2, 18)); // NOI18N
-        memberlabel.setForeground(colors.secondary);
-        memberlabel.setText("MUHAMMAD ANAS  -  068");
+        memberlabel2.setBackground(colors.primary);
+        memberlabel2.setFont(new java.awt.Font("Microsoft Himalaya", 3, 20)); // NOI18N
+        memberlabel2.setForeground(colors.textWithPrimaryBg);
+        memberlabel2.setText("MUHAMMAD ANAS  -  068");
 
         javax.swing.GroupLayout backgroundPanelLayout = new javax.swing.GroupLayout(backgroundPanel);
         backgroundPanel.setLayout(backgroundPanelLayout);
@@ -156,7 +156,7 @@ public class login extends javax.swing.JFrame {
                 .addGroup(backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundPanelLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(memeberlabel, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(memeberlabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(144, 144, 144))
                     .addGroup(backgroundPanelLayout.createSequentialGroup()
                         .addGroup(backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -172,10 +172,10 @@ public class login extends javax.swing.JFrame {
                                         .addComponent(subtitle, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(backgroundPanelLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(memeberLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(memeberLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(backgroundPanelLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(memberlabel, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(memberlabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(backgroundLoginPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 469, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -192,9 +192,9 @@ public class login extends javax.swing.JFrame {
                 .addGap(197, 197, 197)
                 .addComponent(memeberLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(memeberlabel, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(memeberlabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(memberlabel)
+                .addComponent(memberlabel2)
                 .addContainerGap(57, Short.MAX_VALUE))
             .addComponent(backgroundLoginPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -221,20 +221,5 @@ public class login extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel backgroundLoginPanel;
-    private javax.swing.JPanel backgroundPanel;
-    private javax.swing.JButton loginButton;
-    private javax.swing.JLabel loginLabel;
-    private javax.swing.JLabel memberlabel;
-    private javax.swing.JLabel memeberLabel;
-    private javax.swing.JLabel memeberlabel;
-    private javax.swing.JPasswordField passwordField;
-    private javax.swing.JLabel passwordLabel;
-    private javax.swing.JLabel subtitle;
-    private javax.swing.JLabel topLeftLabel;
-    private javax.swing.JTextField usernameField;
-    private javax.swing.JLabel usernameLabel;
-    private javax.swing.JLabel welcomeLabel;
     // End of variables declaration//GEN-END:variables
 }
