@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import logic.AuthService;
 import net.miginfocom.swing.MigLayout;
@@ -16,6 +17,7 @@ import raven.application.Application;
  */
 public class LoginForm extends javax.swing.JPanel {
 
+    ImageIcon loadingIcon = new ImageIcon(getClass().getResource("loading.gif"));
     private JLabel lbError;
 
     public LoginForm() {
@@ -44,7 +46,12 @@ public class LoginForm extends javax.swing.JPanel {
         lbError.setIcon(new ImageIcon(getClass().getResource("warning.png"))); // Add an icon
         lbError.setVisible(false);
 
+        // Initialize the loading animation label
+        lbLoading = new JLabel(loadingIcon); // Set the animated GIF
+        lbLoading.setVisible(false); // Initially hidden
+
         panelLogin1.add(lbError, "gapy 5, wrap"); // Adds error message in layout
+        panelLogin1.add(lbLoading, "gapy 5, wrap"); // Adds loading animation in layout
     }
 
     private void showError(String message) {
@@ -59,15 +66,19 @@ public class LoginForm extends javax.swing.JPanel {
     }
 
     private void addInputListeners() {
-        javax.swing.event.DocumentListener dl = new javax.swing.event.DocumentListener() {
+        javax.swing.event.DocumentListener dl;
+        dl = new javax.swing.event.DocumentListener() {
+            @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
                 clearError();
             }
 
+            @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
                 clearError();
             }
 
+            @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
                 clearError();
             }
@@ -92,6 +103,7 @@ public class LoginForm extends javax.swing.JPanel {
         lbPass = new javax.swing.JLabel();
         txtPass = new javax.swing.JPasswordField();
         cmdLogin = new javax.swing.JButton();
+        lbLoading = new javax.swing.JLabel();
 
         lbTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lbTitle.setText("Login");
@@ -112,6 +124,7 @@ public class LoginForm extends javax.swing.JPanel {
             }
         });
         panelLogin1.add(cmdLogin);
+        panelLogin1.add(lbLoading);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -127,26 +140,63 @@ public class LoginForm extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGap(68, 68, 68)
                 .addComponent(panelLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(96, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
+        // Disable the login button to prevent multiple clicks
+        cmdLogin.setEnabled(false);
+
+        // Show the loading animation
+        lbLoading.setVisible(true);
+
+        // Get the username and password
         String username = txtUser.getText();
         String password = new String(txtPass.getPassword());
 
-        if (AuthService.authenticate(username, password)) {
-            lbError.setVisible(false);
-            Application.login();
-        } else {
-            lbError.setVisible(true);
-            showError("Invalid username or password");
-            txtPass.setText("");
-        }
+        // Use a SwingWorker to perform the login in the background
+        SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                // Simulate a delay for the loading animation (remove this in production)
+                Thread.sleep(2000);
+
+                // Perform the authentication
+                return AuthService.authenticate(username, password);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    boolean authenticated = get(); // Get the result of the authentication
+
+                    if (authenticated) {
+                        lbError.setVisible(false);
+                        Application.login();
+                    } else {
+                        lbError.setVisible(true);
+                        showError("Invalid username or password");
+                        txtPass.setText("");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showError("An error occurred during login");
+                } finally {
+                    // Hide the loading animation and re-enable the login button
+                    lbLoading.setVisible(false);
+                    cmdLogin.setEnabled(true);
+                }
+            }
+        };
+
+        // Execute the SwingWorker
+        worker.execute();
     }//GEN-LAST:event_cmdLoginActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdLogin;
+    private javax.swing.JLabel lbLoading;
     private javax.swing.JLabel lbPass;
     private javax.swing.JLabel lbTitle;
     private javax.swing.JLabel lbUser;
