@@ -20,7 +20,8 @@ public class LoginForm extends javax.swing.JPanel {
     ImageIcon loadingIcon = new ImageIcon(getClass().getResource("Loader.gif"));
     private JLabel lbError;
     private JLabel lbLoading;
-    
+    public String user;
+
     public LoginForm() {
         initComponents();
         init();
@@ -151,7 +152,7 @@ public class LoginForm extends javax.swing.JPanel {
         lbLoading.setVisible(true);
 
         // Get the username and password
-        String username = txtUser.getText();
+        user = txtUser.getText();
         String password = new String(txtPass.getPassword());
 
         // Use a SwingWorker to perform the login in the background
@@ -162,7 +163,9 @@ public class LoginForm extends javax.swing.JPanel {
                 Thread.sleep(2000);
 
                 // Perform the authentication
-                return AuthService.authenticate(username, password);
+                AuthService.setLoggedInUser(user);
+
+                return AuthService.validateOldPassword(user, password);
             }
 
             @Override
@@ -192,6 +195,7 @@ public class LoginForm extends javax.swing.JPanel {
         // Execute the SwingWorker
         worker.execute();
     }//GEN-LAST:event_cmdLoginActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdLogin;
