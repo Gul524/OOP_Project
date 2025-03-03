@@ -3,18 +3,16 @@ package raven.application.form.other;
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JOptionPane;
 import logic.AuthService;
-import logic.changePassword;
-import raven.toast.Notifications;
 import raven.application.form.LoginForm;
+import raven.toast.Notifications;
 
 /**
  *
  * @author Raven
  */
-public class FormUserSettings extends javax.swing.JPanel {
-    LoginForm login = new LoginForm();
+public class PasswordUpdate extends javax.swing.JPanel {
 
-    public FormUserSettings() {
+    public PasswordUpdate() {
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
@@ -121,24 +119,29 @@ public class FormUserSettings extends javax.swing.JPanel {
         String newPassword = new String(newPswd.getPassword()); // Get new password from input
 
         if (oldPassword.isEmpty() || newPassword.isEmpty()) {
-            showError("Please fill in all fields.");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Please fill all fields!");
             return;
         }
 
         if (newPassword.length() < 6) {
-            showError("New password must be at least 6 characters long.");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Password must be 6 characters long!");
+
             return;
         }
 
         if (!AuthService.validateOldPassword(username, oldPassword)) {
-            showError("Old password is incorrect.");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Old Password is Incorrect!");
+
             return;
         }
 
         if (AuthService.changePassword(username, newPassword)) {
-            showSuccess("Password updated successfully.");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Password Updated Successfully!");
+            currentPswd.setText("");
+            newPswd.setText("");
         } else {
-            showError("Password update failed.");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Password Update Failed!");
+
         }
 
     }//GEN-LAST:event_cmdChngPswdActionPerformed

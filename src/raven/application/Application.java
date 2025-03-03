@@ -84,14 +84,6 @@ public class Application extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     public static void main(String args[]) {
-        String username = "testuser";
-        String password = "mypassword"; // User's raw password
-
-        if (AuthService.registerUser(username, password)) {
-            System.out.println("✅ User registered successfully!");
-        } else {
-            System.out.println("❌ Registration failed!");
-        }
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("raven.theme");
         UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));

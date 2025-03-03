@@ -37,7 +37,7 @@ public class Menu extends JPanel {
         {"~OTHER~"},
         {"Charts", "Apex", "Flot", "Peity", "Sparkline"},
         {"Icons", "Feather Icons", "Flag Icons", "Mdi Icons"},
-        {"Special Pages", "Blank page", "Faq", "Invoice", "Profile", "Pricing", "Timeline"},
+        {"User Settings", "Change Password", "Manage Users"},
         {"Logout"}
     };
 

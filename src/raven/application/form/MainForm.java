@@ -16,10 +16,11 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import raven.application.Application;
-import raven.application.form.other.FormUserSettings;
 import raven.application.form.other.FormDashboard;
 import raven.application.form.other.FormInbox;
 import raven.application.form.other.FormRead;
+import raven.application.form.other.PasswordUpdate;
+import raven.application.form.other.UserPanel;
 import raven.menu.Menu;
 import raven.menu.MenuAction;
 
@@ -84,7 +85,10 @@ public class MainForm extends JLayeredPane {
 
                 case 8 -> {
                     if (subIndex == 1) {
-                        Application.showForm(new FormUserSettings());
+                        Application.showForm(new PasswordUpdate());
+                    }
+                    if (subIndex == 2) {
+                        Application.showForm(new UserPanel());
                     }
                 }
                 case 9 -> Application.logout();

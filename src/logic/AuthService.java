@@ -144,7 +144,7 @@ public class AuthService {
     /**
      * Get database connection.
      */
-    private static Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 }
