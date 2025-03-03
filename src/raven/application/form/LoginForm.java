@@ -54,12 +54,17 @@ public class LoginForm extends javax.swing.JPanel {
 
         panelLogin1.add(lbError, "gapy 5, wrap"); // Adds error message in layout
         panelLogin1.add(lbLoading, "gapy 5, wrap"); // Adds loading animation in layout
+
+        panelLogin1.revalidate();
+        panelLogin1.repaint();
     }
 
     private void showError(String message) {
         lbError.setText("<html><span style='color:red; font-weight:bold;'>" + message + "</span></html>");
         lbError.setVisible(true);
 
+        panelLogin1.revalidate();
+        panelLogin1.repaint();
         // Add input listeners to clear error on new input
         addInputListeners();
 
@@ -68,25 +73,28 @@ public class LoginForm extends javax.swing.JPanel {
     }
 
     private void addInputListeners() {
-        javax.swing.event.DocumentListener dl;
-        dl = new javax.swing.event.DocumentListener() {
+        javax.swing.event.DocumentListener dl = new javax.swing.event.DocumentListener() {
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                clearError();
+                clearErrorIfUserTypes();
             }
 
             @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                clearError();
+//                clearErrorIfUserTypes();
             }
 
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                clearError();
+                clearErrorIfUserTypes();
             }
 
-            private void clearError() {
-                lbError.setVisible(false);
+            private void clearErrorIfUserTypes() {
+                if (lbError.isVisible()) { // Only clear if error message is currently shown
+                    lbError.setVisible(false);
+                    panelLogin1.revalidate();
+                    panelLogin1.repaint();
+                }
             }
         };
 
@@ -145,6 +153,9 @@ public class LoginForm extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
+        // Hide the error message before starting the authentication
+        lbError.setVisible(false);
+
         // Disable the login button to prevent multiple clicks
         cmdLogin.setEnabled(false);
 
@@ -164,7 +175,6 @@ public class LoginForm extends javax.swing.JPanel {
 
                 // Perform the authentication
                 AuthService.setLoggedInUser(user);
-
                 return AuthService.validateOldPassword(user, password);
             }
 
@@ -178,8 +188,7 @@ public class LoginForm extends javax.swing.JPanel {
                         txtPass.setText("");
                         Application.login();
                     } else {
-                        lbError.setVisible(true);
-                        showError("Invalid username or password");
+                        showError("Invalid username or password");  // Show error on first attempt
                         txtPass.setText("");
                     }
                 } catch (Exception e) {
