@@ -175,6 +175,7 @@ public class LoginForm extends javax.swing.JPanel {
 
                     if (authenticated) {
                         lbError.setVisible(false);
+                        txtPass.setText("");
                         Application.login();
                     } else {
                         lbError.setVisible(true);

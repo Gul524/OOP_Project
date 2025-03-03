@@ -5,6 +5,8 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import logic.UserService;
 
@@ -22,9 +24,15 @@ public class UserPanel extends javax.swing.JPanel {
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
         String[] columnNames = {"ID", "Username", "Role"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return false; // Prevents editing but allows selection
+            }
+        };
         tblUsers.setModel(model);
-
+        tblUsers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblUsers.setRowSelectionAllowed(true);
+        tblUsers.setColumnSelectionAllowed(false);
         // Load data from database when the window opens
         loadUserTable();
     }
@@ -74,9 +82,11 @@ public class UserPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
+        tblUsers.setColumnSelectionAllowed(true);
         tblUsers.setName("tblUsers"); // NOI18N
         tblUsers.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(tblUsers);
+        tblUsers.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         if (tblUsers.getColumnModel().getColumnCount() > 0) {
             tblUsers.getColumnModel().getColumn(3).setResizable(false);
         }
@@ -91,14 +101,19 @@ public class UserPanel extends javax.swing.JPanel {
             }
         });
 
-        btnEditUser.setText("Delete User");
+        btnEditUser.setText("Edit User");
         btnEditUser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEditUserActionPerformed(evt);
             }
         });
 
-        btnDltUser.setText("Edit User");
+        btnDltUser.setText("Delete User");
+        btnDltUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDltUserActionPerformed(evt);
+            }
+        });
 
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
@@ -113,20 +128,18 @@ public class UserPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(lb, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(251, 251, 251)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnAddUser, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnEditUser)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnDltUser, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(15, 15, 15)))
-                .addGap(237, 237, 237))
+                .addContainerGap(266, Short.MAX_VALUE)
+                .addComponent(btnAddUser, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnEditUser)
+                .addGap(18, 18, 18)
+                .addComponent(btnDltUser, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(252, 252, 252))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1))
         );
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAddUser, btnDltUser, btnEditUser, btnRefresh});
@@ -136,9 +149,9 @@ public class UserPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lb)
-                .addGap(24, 24, 24)
-                .addComponent(jScrollPane1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 421, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnEditUser)
                     .addComponent(btnDltUser)
@@ -149,11 +162,76 @@ public class UserPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddUserActionPerformed
-        // TODO add your handling code here:
+        // Get user input
+        String username = JOptionPane.showInputDialog(this, "Enter username:");
+        if (username == null || username.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Username cannot be empty.");
+            return;
+        }
+
+        String password = JOptionPane.showInputDialog(this, "Enter password:");
+        if (password == null || password.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Password cannot be empty.");
+            return;
+        }
+
+        String[] roles = {"Admin", "User"}; // Modify roles as per your system
+        String role = (String) JOptionPane.showInputDialog(this, "Select role:",
+                "Role Selection", JOptionPane.QUESTION_MESSAGE, null, roles, roles[0]);
+
+        if (role == null) {
+            JOptionPane.showMessageDialog(this, "Role selection is required.");
+            return;
+        }
+
+        // Call UserService to add user
+        boolean added = UserService.addUser(username, password, role);
+
+        if (added) {
+            JOptionPane.showMessageDialog(this, "User added successfully!");
+            UserService.loadUsers((DefaultTableModel) tblUsers.getModel()); // Refresh table
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to add user.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnAddUserActionPerformed
 
     private void btnEditUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditUserActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = tblUsers.getSelectedRow(); // Get selected row index
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a user to edit.");
+            return;
+        }
+
+        // Extract user details
+        int userId = (int) tblUsers.getValueAt(selectedRow, 0); // ID (Hidden column)
+        String oldUsername = (String) tblUsers.getValueAt(selectedRow, 1); // Existing Username
+        String newRole = (String) tblUsers.getValueAt(selectedRow, 2); // Editable Role
+
+        // Get new username from user input
+        String newUsername = JOptionPane.showInputDialog(this, "Enter new username:", oldUsername);
+        if (newUsername == null || newUsername.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Username cannot be empty.");
+            return;
+        }
+
+        // Get new password (optional)
+        String newPassword = JOptionPane.showInputDialog(this, "Enter new password (Leave blank to keep current):");
+
+        // If user cancels or doesn't enter a password, keep the old one
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            newPassword = "KEEP_OLD"; // Flag to indicate no change
+        }
+
+        // Update in database
+        boolean updated = UserService.updateUser(userId, newUsername, newPassword, newRole);
+
+        if (updated) {
+            JOptionPane.showMessageDialog(this, "User updated successfully!");
+            UserService.loadUsers((DefaultTableModel) tblUsers.getModel()); // Refresh table
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to update user.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnEditUserActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
@@ -161,6 +239,28 @@ public class UserPanel extends javax.swing.JPanel {
         UserService.loadUsers(model);
 
     }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnDltUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDltUserActionPerformed
+        int selectedRow = tblUsers.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(null, "Please select a user to delete.");
+            return;
+        }
+
+        int userId = (int) tblUsers.getValueAt(selectedRow, 0); // Assuming first column is user ID
+        int confirm = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete this user?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (UserService.deleteUser(userId)) {
+                JOptionPane.showMessageDialog(null, "User deleted successfully.");
+                DefaultTableModel model = (DefaultTableModel) tblUsers.getModel();
+                model.removeRow(selectedRow); // Correct way to remove row from table
+            } else {
+                JOptionPane.showMessageDialog(null, "Failed to delete user.");
+            }
+        }
+    }//GEN-LAST:event_btnDltUserActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

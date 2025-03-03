@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
 
@@ -14,16 +15,17 @@ public class UserService {
     public static boolean addUser(String username, String password, String role) {
         String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
 
-        try (Connection conn = AuthService.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = AuthService.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            stmt.setString(2, hashPassword(password)); // Hash password before saving
+            stmt.setString(2, hashPassword(password)); // Ideally, hash the password before storing
             stmt.setString(3, role);
-            return stmt.executeUpdate() > 0;
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
             return false;
         }
     }
@@ -32,8 +34,7 @@ public class UserService {
     public static boolean deleteUser(int userId) {
         String sql = "DELETE FROM users WHERE id = ?";
 
-        try (Connection conn = AuthService.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = AuthService.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
             return stmt.executeUpdate() > 0;
@@ -45,17 +46,46 @@ public class UserService {
     }
 
     // Update user details (password and role)
-    public static boolean updateUser(int userId, String newPassword, String newRole) {
-        String sql = "UPDATE users SET password = ?, role = ? WHERE id = ?";
+    public static boolean updateUser(int userId, String newUsername, String newPassword, String newRole) {
+        String sql;
+        boolean updatePassword = (newPassword != null && !newPassword.trim().isEmpty());
+        String existingPassword = null;
 
-        try (Connection conn = AuthService.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = AuthService.getConnection()) {
+            // Retrieve the existing password if no new one is provided
+            if (!updatePassword) {
+                String fetchSql = "SELECT password FROM users WHERE id = ?";
+                try (PreparedStatement fetchStmt = conn.prepareStatement(fetchSql)) {
+                    fetchStmt.setInt(1, userId);
+                    try (ResultSet rs = fetchStmt.executeQuery()) {
+                        if (rs.next()) {
+                            existingPassword = rs.getString("password");
+                        }
+                    }
+                }
+            }
 
-            stmt.setString(1, hashPassword(newPassword)); // Hash password before saving
-            stmt.setString(2, newRole);
-            stmt.setInt(3, userId);
-            return stmt.executeUpdate() > 0;
+            // Prepare the update statement
+            if (updatePassword) {
+                sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?";
+            } else {
+                sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?";
+            }
 
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, newUsername);
+
+                if (updatePassword) {
+                    stmt.setString(2, hashPassword(newPassword));  // Use BCrypt instead of SHA-256
+                } else {
+                    stmt.setString(2, existingPassword); // Keep old password
+                }
+
+                stmt.setString(3, newRole);
+                stmt.setInt(4, userId);
+
+                return stmt.executeUpdate() > 0;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -67,9 +97,7 @@ public class UserService {
         List<Object[]> users = new ArrayList<>();
         String sql = "SELECT id, username, role FROM users";
 
-        try (Connection conn = AuthService.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (Connection conn = AuthService.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 users.add(new Object[]{rs.getInt("id"), rs.getString("username"), rs.getString("role")});
@@ -93,17 +121,6 @@ public class UserService {
 
     // Utility: Hash password using SHA-256
     private static String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return password; // Fallback (not recommended)
-        }
+        return BCrypt.hashpw(password, BCrypt.gensalt(12)); // Use same hashing method for consistency
     }
 }
