@@ -215,6 +215,7 @@ public class UserPanel extends javax.swing.JPanel {
             return;
         }
 
+        
         // Get new password (optional)
         String newPassword = JOptionPane.showInputDialog(this, "Enter new password (Leave blank to keep current):");
 
@@ -223,6 +224,14 @@ public class UserPanel extends javax.swing.JPanel {
             newPassword = "KEEP_OLD"; // Flag to indicate no change
         }
 
+        String[] roles = {"Admin", "User"}; // Modify roles as per your system
+        String role = (String) JOptionPane.showInputDialog(this, "Select role:",
+                "Role Selection", JOptionPane.QUESTION_MESSAGE, null, roles, roles[0]);
+
+        if (role == null) {
+            JOptionPane.showMessageDialog(this, "Role selection is required.");
+            return;
+        }
         // Update in database
         boolean updated = UserService.updateUser(userId, newUsername, newPassword, newRole);
 

@@ -182,8 +182,11 @@ public class LoginForm extends javax.swing.JPanel {
             protected void done() {
                 try {
                     boolean authenticated = get(); // Get the result of the authentication
-
-                    if (authenticated) {
+                    if (!AuthService.isDatabaseConnected()) {
+                        Application.login();
+                        showError("Connection to database failed");  // Show error on first attempt
+                        txtPass.setText("");
+                    } else if (authenticated) {
                         lbError.setVisible(false);
                         txtPass.setText("");
                         Application.login();

@@ -49,40 +49,25 @@ public class UserService {
     public static boolean updateUser(int userId, String newUsername, String newPassword, String newRole) {
         String sql;
         boolean updatePassword = (newPassword != null && !newPassword.trim().isEmpty());
-        String existingPassword = null;
 
         try (Connection conn = AuthService.getConnection()) {
-            // Retrieve the existing password if no new one is provided
-            if (!updatePassword) {
-                String fetchSql = "SELECT password FROM users WHERE id = ?";
-                try (PreparedStatement fetchStmt = conn.prepareStatement(fetchSql)) {
-                    fetchStmt.setInt(1, userId);
-                    try (ResultSet rs = fetchStmt.executeQuery()) {
-                        if (rs.next()) {
-                            existingPassword = rs.getString("password");
-                        }
-                    }
-                }
-            }
-
-            // Prepare the update statement
             if (updatePassword) {
                 sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?";
             } else {
-                sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?";
+                sql = "UPDATE users SET username = ?, role = ? WHERE id = ?";
             }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, newUsername);
 
                 if (updatePassword) {
-                    stmt.setString(2, hashPassword(newPassword));  // Use BCrypt instead of SHA-256
+                    stmt.setString(2, hashPassword(newPassword));
+                    stmt.setString(3, newRole);
+                    stmt.setInt(4, userId);
                 } else {
-                    stmt.setString(2, existingPassword); // Keep old password
+                    stmt.setString(2, newRole);
+                    stmt.setInt(3, userId);
                 }
-
-                stmt.setString(3, newRole);
-                stmt.setInt(4, userId);
 
                 return stmt.executeUpdate() > 0;
             }
