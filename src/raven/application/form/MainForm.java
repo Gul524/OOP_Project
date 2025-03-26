@@ -17,8 +17,11 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import raven.application.Application;
 import raven.application.form.other.FormDashboard;
-import raven.application.form.other.FormInbox;
-import raven.application.form.other.FormRead;
+import raven.application.form.other.FormStaff;
+import raven.application.form.other.FormMenu;
+import raven.application.form.other.FormInventory;
+import raven.application.form.other.FormOrder;
+import raven.application.form.other.FormReports;
 import raven.application.form.other.PasswordUpdate;
 import raven.application.form.other.UserPanel;
 import raven.menu.Menu;
@@ -73,26 +76,22 @@ public class MainForm extends JLayeredPane {
         menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
             // Application.mainForm.showForm(new DefaultForm("Form : " + index + " " + subIndex));
             switch (index) {
-                case 0 -> Application.showForm(new FormDashboard());
-                case 1 -> {
-                    switch (subIndex) {
-                        case 1 -> Application.showForm(new FormInbox());
-                        case 2 -> Application.showForm(new FormRead());
-                        default -> action.cancel();
-                    }
-                }
-
-
-                case 8 -> {
-                    if (subIndex == 1) {
-                        Application.showForm(new PasswordUpdate());
-                    }
-                    if (subIndex == 2) {
-                        Application.showForm(new UserPanel());
-                    }
-                }
-                case 9 -> Application.logout();
-                default -> action.cancel();
+                case 0 ->
+                    Application.showForm(new FormDashboard());
+                case 1 ->
+                    Application.showForm(new FormMenu());
+                case 2 ->
+                    Application.showForm(new FormStaff());
+                case 3 ->
+                    Application.showForm(new FormInventory());
+                case 4 ->
+                    Application.showForm(new FormReports());
+                case 5 ->
+                    Application.showForm(new FormOrder());
+                case 6 ->
+                    Application.logout();
+                default ->
+                    action.cancel();
             }
         });
     }
