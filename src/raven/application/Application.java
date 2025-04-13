@@ -14,6 +14,7 @@ import logic.AuthService;
 import raven.application.form.LoginForm;
 import raven.application.form.MainForm;
 import raven.toast.Notifications;
+import raven.application.form.MainFormStaff;
 
 /**
  *
@@ -23,6 +24,7 @@ public class Application extends javax.swing.JFrame {
 
     private static Application app;
     public final MainForm mainForm;
+    public final MainFormStaff mainFormStaff;
     private final LoginForm loginForm;
 
     public Application() {
@@ -30,6 +32,7 @@ public class Application extends javax.swing.JFrame {
         setSize(new Dimension(1366, 768));
         setLocationRelativeTo(null);
         mainForm = new MainForm();
+        mainFormStaff = new MainFormStaff();
         loginForm = new LoginForm();
         setContentPane(loginForm);
         getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
@@ -40,6 +43,11 @@ public class Application extends javax.swing.JFrame {
         component.applyComponentOrientation(app.getComponentOrientation());
         app.mainForm.showForm(component);
     }
+    
+    public static void showFormStaff(Component component) {
+        component.applyComponentOrientation(app.getComponentOrientation());
+        app.mainFormStaff.showForm(component);
+    }
 
     public static void login() {
         FlatAnimatedLafChange.showSnapshot();
@@ -48,6 +56,16 @@ public class Application extends javax.swing.JFrame {
         setSelectedMenu(0, 0);
         app.mainForm.hideMenu();
         SwingUtilities.updateComponentTreeUI(app.mainForm);
+        FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    }
+    
+    public static void loginStaff() {
+        FlatAnimatedLafChange.showSnapshot();
+        app.setContentPane(app.mainFormStaff);
+        app.mainFormStaff.applyComponentOrientation(app.getComponentOrientation());
+        setSelectedMenuStaff(0, 0);
+        app.mainFormStaff.hideMenu();
+        SwingUtilities.updateComponentTreeUI(app.mainFormStaff);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
@@ -61,6 +79,10 @@ public class Application extends javax.swing.JFrame {
 
     public static void setSelectedMenu(int index, int subIndex) {
         app.mainForm.setSelectedMenu(index, subIndex);
+    }
+    
+    public static void setSelectedMenuStaff(int index, int subIndex) {
+        app.mainFormStaff.setSelectedMenu(index, subIndex);
     }
 
     @SuppressWarnings("unchecked")

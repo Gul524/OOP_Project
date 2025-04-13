@@ -22,6 +22,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import raven.menu.Menu;
+import raven.staffMenu.StaffMenu;
 
 /**
  *
@@ -29,7 +30,8 @@ import raven.menu.Menu;
  */
 public class ToolBarAccentColor extends JPanel {
 
-    private final Menu menu;
+    private Menu menu;
+    private StaffMenu staffMenu;
     private final JPopupMenu popup = new JPopupMenu();
 
     public boolean isMenuFull() {
@@ -58,6 +60,11 @@ public class ToolBarAccentColor extends JPanel {
 
     public ToolBarAccentColor(Menu menu) {
         this.menu = menu;
+        init();
+    }
+    
+    public ToolBarAccentColor(StaffMenu staffMenu) {
+        this.staffMenu = staffMenu;
         init();
     }
 

@@ -20,7 +20,6 @@ public class LoginForm extends javax.swing.JPanel {
     ImageIcon loadingIcon = new ImageIcon(getClass().getResource("Loader.gif"));
     private JLabel lbError;
     private JLabel lbLoading;
-    public String user;
 
     public LoginForm() {
         initComponents();
@@ -147,66 +146,74 @@ public class LoginForm extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(68, 68, 68)
-                .addComponent(panelLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addComponent(panelLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(120, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
         // Hide the error message before starting the authentication
         lbError.setVisible(false);
-
-        // Disable the login button to prevent multiple clicks
-        cmdLogin.setEnabled(false);
-
-        // Show the loading animation
-        lbLoading.setVisible(true);
-
+//
+//        // Disable the login button to prevent multiple clicks
+//        cmdLogin.setEnabled(false);
+//
+//        // Show the loading animation
+//        lbLoading.setVisible(true);
+//
         // Get the username and password
-        user = txtUser.getText();
+        String user = txtUser.getText();
         String password = new String(txtPass.getPassword());
+//
+//        // Use a SwingWorker to perform the login in the background
+//        SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
+//            @Override
+//            protected Boolean doInBackground() throws Exception {
+//                // Simulate a delay for the loading animation (remove this in production)
+//                Thread.sleep(2000);
+//
+//                // Perform the authentication
+//                AuthService.setLoggedInUser(user);
+//                return AuthService.validateOldPassword(user, password);
+//            }
+//
+//            @Override
+//            protected void done() {
+//                try {
+//                    boolean authenticated = get(); // Get the result of the authentication
+//                    if (!AuthService.isDatabaseConnected()) {
+//                        Application.login();
+//                        showError("Connection to database failed");  // Show error on first attempt
+//                        txtPass.setText("");
+//                    } else if (authenticated) {
+//                        lbError.setVisible(false);
+//                        txtPass.setText("");
+//                        Application.login();
+//                    } else {
+//                        showError("Invalid username or password");  // Show error on first attempt
+//                        txtPass.setText("");
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    showError("An error occurred during login");
+//                } finally {
+//                    // Hide the loading animation and re-enable the login button
+//                    lbLoading.setVisible(false);
+//                    cmdLogin.setEnabled(true);
+//                }
+//            }
+//        };
+//
+//        // Execute the SwingWorker
+//        worker.execute();
 
-        // Use a SwingWorker to perform the login in the background
-        SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
-            @Override
-            protected Boolean doInBackground() throws Exception {
-                // Simulate a delay for the loading animation (remove this in production)
-                Thread.sleep(2000);
-
-                // Perform the authentication
-                AuthService.setLoggedInUser(user);
-                return AuthService.validateOldPassword(user, password);
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    boolean authenticated = get(); // Get the result of the authentication
-                    if (!AuthService.isDatabaseConnected()) {
-                        Application.login();
-                        showError("Connection to database failed");  // Show error on first attempt
-                        txtPass.setText("");
-                    } else if (authenticated) {
-                        lbError.setVisible(false);
-                        txtPass.setText("");
-                        Application.login();
-                    } else {
-                        showError("Invalid username or password");  // Show error on first attempt
-                        txtPass.setText("");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showError("An error occurred during login");
-                } finally {
-                    // Hide the loading animation and re-enable the login button
-                    lbLoading.setVisible(false);
-                    cmdLogin.setEnabled(true);
-                }
-            }
-        };
-
-        // Execute the SwingWorker
-        worker.execute();
+        if (("staff").equals(user)) {
+            Application.loginStaff();
+            System.out.println("Staff login");
+        }
+        else if (("admin").equals(user)) {
+            Application.login();
+        }
     }//GEN-LAST:event_cmdLoginActionPerformed
 
 
