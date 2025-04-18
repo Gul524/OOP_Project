@@ -6,9 +6,9 @@ import com.formdev.flatlaf.FlatClientProperties;
  *
  * @author Raven
  */
-public class FormStaff extends javax.swing.JPanel {
+public class FormCategories extends javax.swing.JPanel {
 
-    public FormStaff() {
+    public FormCategories() {
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
@@ -21,7 +21,7 @@ public class FormStaff extends javax.swing.JPanel {
         lb = new javax.swing.JLabel();
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lb.setText("Staff");
+        lb.setText("Categories");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
