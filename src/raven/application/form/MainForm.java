@@ -22,7 +22,7 @@ import raven.application.form.other.FormDashboard;
 import raven.application.form.other.FormStaff;
 import raven.application.form.other.FormMenu;
 import raven.application.form.other.FormInventory;
-import raven.application.form.other.FormOrder;
+import raven.application.form.other.Bills;
 import raven.application.form.other.FormProducts;
 import raven.application.form.other.FormReports;
 import raven.application.form.other.PasswordUpdate;
@@ -86,12 +86,12 @@ public class MainForm extends JLayeredPane {
                 }
                 if (subIndex == 2) {
                     Application.showForm(new FormProducts());
-                }
+                    }
             }
             case 2 -> Application.showForm(new FormStaff());
             case 3 -> Application.showForm(new FormInventory());
             case 4 -> Application.showForm(new FormReports());
-            case 5 -> Application.showForm(new FormOrder());
+            case 5 -> Application.showForm(new Bills());
             case 6 -> Application.logout();
             default -> action.cancel();
         }

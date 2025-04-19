@@ -5,9 +5,8 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.SwingWorker;
 import javax.swing.Timer;
-import logic.AuthService;
+import logic.ApiClient;
 import net.miginfocom.swing.MigLayout;
 import raven.application.Application;
 
@@ -207,13 +206,15 @@ public class LoginForm extends javax.swing.JPanel {
 //        // Execute the SwingWorker
 //        worker.execute();
 
-        if (("staff").equals(user)) {
-            Application.loginStaff();
-            System.out.println("Staff login");
-        }
-        else if (("admin").equals(user)) {
-            Application.login();
-        }
+//        if (("staff").equals(user)) {
+//            Application.loginStaff();
+//            System.out.println("Staff login");
+//        }
+//        else if (("admin").equals(user)) {
+//            Application.login();
+//        }
+
+          ApiClient.login(user, password);
     }//GEN-LAST:event_cmdLoginActionPerformed
 
 

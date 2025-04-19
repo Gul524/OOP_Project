@@ -3,28 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Java/OOP_Project/src/logic/AuthService.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/application/form/LoginForm.java</file>
+            <file>file:/D:/Java/OOP_Project/src/raven/application/form/other/Bills.java</file>
+            <file>file:/D:/Java/OOP_Project/src/raven/application/form/other/ReserveTables.java</file>
+            <file>file:/D:/Java/OOP_Project/src/raven/application/form/other/FormProducts.java</file>
             <file>file:/D:/Java/OOP_Project/src/raven/application/form/MainForm.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/menu/MenuItem.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/menu/MenuItemLayout.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/menu/MenuAnimation.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/menu/MenuEvent.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/application/form/other/UserPanel.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/menu/Menu.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/application/form/other/PasswordUpdate.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/application/Application.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/application/form/other/FormDashboard.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/application/form/MainFormStaff.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/FormOrder.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/MenuItemLayout.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/MenuAnimation.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/MenuItem.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/PopupSubmenu.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/MenuAction.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/MenuEvent.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/staffMenu/StaffMenu.java</file>
-            <file>file:/D:/Java/OOP_Project/src/raven/menu/mode/ToolBarAccentColor.java</file>
+            <file>file:/D:/Java/OOP_Project/src/logic/ApiClient.java</file>
+            <file>file:/D:/Java/OOP_Project/src/models/BranchModel.java</file>
         </group>
     </open-files>
 </project-private>

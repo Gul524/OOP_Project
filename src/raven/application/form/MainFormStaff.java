@@ -20,7 +20,7 @@ import raven.application.form.other.FormDashboard;
 import raven.application.form.other.FormStaff;
 import raven.application.form.other.FormMenu;
 import raven.application.form.other.FormInventory;
-import raven.application.form.other.FormOrder;
+import raven.application.form.other.Bills;
 import raven.application.form.other.FormReports;
 import raven.application.form.other.PasswordUpdate;
 import raven.application.form.other.UserPanel;
@@ -81,7 +81,7 @@ public class MainFormStaff extends JLayeredPane {
                 case 1 ->
                     Application.showFormStaff(new FormReports());
                 case 2 ->
-                    Application.showFormStaff(new FormOrder());
+                    Application.showFormStaff(new Bills());
                 case 3 ->
                     Application.logout();
                 default ->
