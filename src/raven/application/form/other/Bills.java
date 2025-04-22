@@ -2,6 +2,7 @@ package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -43,19 +44,74 @@ public class Bills extends javax.swing.JPanel {
     private Map<String, JLabel> billGrandTotals = new HashMap<>();
     private ButtonGroup customerTypeGroup = new ButtonGroup();
 
+    class ProductComboBoxEditor extends DefaultCellEditor {
+
+        private final JTable table;
+        private final int column; // 3 for Size, 4 for Flavor
+        private final Map<String, List<Product>> categoryProductsMap;
+
+        public ProductComboBoxEditor(JTable table, int column, Map<String, List<Product>> categoryProductsMap) {
+            super(new JComboBox<>());
+            this.table = table;
+            this.column = column;
+            this.categoryProductsMap = categoryProductsMap;
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            JComboBox<String> comboBox = (JComboBox<String>) super.getTableCellEditorComponent(table, value, isSelected, row, column);
+            String productId = (String) table.getValueAt(row, 0);
+            Product product = findProductById(productId);
+            if (product != null) {
+                String[] options = (this.column == 3)
+                        ? (product.sizes != null && !product.sizes.isEmpty() ? product.sizes.toArray(new String[0]) : new String[]{"N/A"})
+                        : (product.flavors != null && !product.flavors.isEmpty() ? product.flavors.toArray(new String[0]) : new String[]{"N/A"});
+                comboBox.setModel(new DefaultComboBoxModel<>(options));
+            } else {
+                comboBox.setModel(new DefaultComboBoxModel<>(new String[]{"N/A"}));
+            }
+            return comboBox;
+        }
+
+        private Product findProductById(String id) {
+            for (List<Product> products : categoryProductsMap.values()) {
+                if (products != null) {
+                    for (Product product : products) {
+                        if (product.id.equals(id)) {
+                            return product;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
     class Product {
+
         String id;
         String name;
-        int price;
+        Map<String, Integer> sizePrices;
         List<String> sizes;
         List<String> flavors;
-    
-        public Product(String id, String name, int price, List<String> pizzaSizes, List<String> pizzaFlavors) {
+
+        public Product(String id, String name, Map<String, Integer> sizePrices, List<String> sizes, List<String> flavors) {
             this.id = id;
             this.name = name;
-            this.price = price;
-            this.sizes = pizzaSizes; // Correct assignment
-            this.flavors = pizzaFlavors; // Correct assignment
+            this.sizePrices = sizePrices;
+            this.sizes = sizes;
+            this.flavors = flavors;
+        }
+
+        public int getPriceForSize(String size) {
+            if (size == null || size.equals("N/A") || !sizePrices.containsKey(size)) {
+                // Return price for default size if available, otherwise throw exception
+                if (sizes != null && !sizes.isEmpty()) {
+                    return sizePrices.getOrDefault(sizes.get(0), 0);
+                }
+                throw new IllegalArgumentException("No valid price for size: " + size + " for product: " + name);
+            }
+            return sizePrices.get(size);
         }
     }
 
@@ -70,91 +126,110 @@ public class Bills extends javax.swing.JPanel {
 
     private void initializeData() {
         categoryProductsMap = new HashMap<>();
-    
+
+        // Pizzas
         List<Product> pizzas = new ArrayList<>();
         List<String> pizzaSizes = Arrays.asList("Small", "Medium", "Large");
         List<String> pizzaFlavors = Arrays.asList("Pepperoni", "Fajita", "Vegetarian");
-        pizzas.add(new Product("P001", "Pizza", 1200, pizzaSizes, pizzaFlavors));
-    
+        Map<String, Integer> pizzaPrices = new HashMap<>();
+        pizzaPrices.put("Small", 800);
+        pizzaPrices.put("Medium", 1000);
+        pizzaPrices.put("Large", 1200);
+        pizzas.add(new Product("P001", "Pizza", pizzaPrices, pizzaSizes, pizzaFlavors));
+
+        // Drinks
         List<Product> drinks = new ArrayList<>();
         List<String> drinkSizes = Arrays.asList("300ML", "500ML", "1L");
         List<String> drinkFlavors = Arrays.asList("Cola", "Lemon", "Orange");
-        drinks.add(new Product("D001", "Soft Drink", 150, drinkSizes, drinkFlavors));
-    
+        Map<String, Integer> drinkPrices = new HashMap<>();
+        drinkPrices.put("300ML", 100);
+        drinkPrices.put("500ML", 150);
+        drinkPrices.put("1L", 200);
+        drinks.add(new Product("D001", "Soft Drink", drinkPrices, drinkSizes, drinkFlavors));
+
+        // Burgers
         List<Product> burgers = new ArrayList<>();
         List<String> burgerSizes = Arrays.asList("Small", "Medium", "Large");
         List<String> burgerFlavors = Arrays.asList("Zinger", "Double Zinger", "Dhamaka");
-        burgers.add(new Product("B001", "Burger", 350, burgerSizes, burgerFlavors));
-    
+        Map<String, Integer> burgerPrices = new HashMap<>();
+        burgerPrices.put("Small", 250);
+        burgerPrices.put("Medium", 350);
+        burgerPrices.put("Large", 450);
+        burgers.add(new Product("B001", "Burger", burgerPrices, burgerSizes, burgerFlavors));
+
+        // Validate that all sizes have prices
+        for (List<Product> products : new ArrayList<>(Arrays.asList(pizzas, drinks, burgers))) {
+            for (Product product : products) {
+                for (String size : product.sizes) {
+                    if (!product.sizePrices.containsKey(size)) {
+                        throw new IllegalStateException("Missing price for size " + size + " in product " + product.name);
+                    }
+                }
+            }
+        }
+
         categoryProductsMap.put("Pizzas", pizzas);
         categoryProductsMap.put("Drinks", drinks);
         categoryProductsMap.put("Burgers", burgers);
-    
+
         Categories.setModel(new DefaultComboBoxModel<>(new String[]{"All", "Pizzas", "Drinks", "Burgers"}));
     }
-    
+
     private void setupProductsTable() {
-        // Update column names
         productsTableModel = new DefaultTableModel(
-            new Object[][]{},
-            new String[]{"ID", "Name", "Price", "Size", "Flavor"}
+                new Object[][]{},
+                new String[]{"ID", "Name", "Price", "Size", "Flavor"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return column == 3 || column == 4; // Only Size and Flavor are editable
             }
         };
-    
+
         jTable1.setModel(productsTableModel);
-    
+
         // Set custom editors for Size and Flavor columns
-        jTable1.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JComboBox<>()));
-        jTable1.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JComboBox<>()));
-    
+        jTable1.getColumnModel().getColumn(3).setCellEditor(new ProductComboBoxEditor(jTable1, 3, categoryProductsMap));
+        jTable1.getColumnModel().getColumn(4).setCellEditor(new ProductComboBoxEditor(jTable1, 4, categoryProductsMap));
+
         // Populate table with products from all categories
         for (List<Product> products : categoryProductsMap.values()) {
             for (Product product : products) {
+                String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                 productsTableModel.addRow(new Object[]{
                     product.id,
                     product.name,
-                    product.price,
-                    product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "",
-                    product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : ""
+                    product.getPriceForSize(defaultSize),
+                    defaultSize,
+                    product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                 });
             }
         }
-    
-        // Add selection listener to update dropdowns when row is selected
-        jTable1.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int row = jTable1.getSelectedRow();
-                if (row >= 0) {
-                    String productId = (String) jTable1.getValueAt(row, 0);
-                    Product product = findProductById(productId);
-    
-                    if (product != null) {
-                        // Update size dropdown
-                        JComboBox<String> sizeCombo = new JComboBox<>(
-                            product.sizes != null && !product.sizes.isEmpty()
-                                ? product.sizes.toArray(new String[0])
-                                : new String[]{"N/A"}
-                        );
-                        jTable1.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(sizeCombo));
-    
-                        // Update flavor dropdown
-                        JComboBox<String> flavorCombo = new JComboBox<>(
-                            product.flavors != null && !product.flavors.isEmpty()
-                                ? product.flavors.toArray(new String[0])
-                                : new String[]{"N/A"}
-                        );
-                        jTable1.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(flavorCombo));
+
+        // Add table model listener to update price when size changes
+        productsTableModel.addTableModelListener(e -> {
+            if (e.getColumn() == 3) { // Size column changed
+                int row = e.getFirstRow();
+                String productId = (String) jTable1.getValueAt(row, 0);
+                String newSize = (String) jTable1.getValueAt(row, 3);
+                Product product = findProductById(productId);
+                if (product != null && newSize != null && !newSize.equals("N/A")) {
+                    int newPrice = product.getPriceForSize(newSize);
+                    if (newPrice > 0) {
+                        productsTableModel.setValueAt(newPrice, row, 2); // Update price column
+                    } else {
+                        JOptionPane.showMessageDialog(Bills.this,
+                                "Invalid price for size: " + newSize,
+                                "Price Error",
+                                JOptionPane.WARNING_MESSAGE);
+                        productsTableModel.setValueAt(product.sizes.get(0), row, 3); // Revert to default size
+                        productsTableModel.setValueAt(product.getPriceForSize(product.sizes.get(0)), row, 2);
                     }
                 }
             }
         });
     }
-    
-    
+
     // Helper method to find product by ID
     private Product findProductById(String id) {
         for (List<Product> products : categoryProductsMap.values()) {
@@ -179,7 +254,7 @@ public class Bills extends javax.swing.JPanel {
 
 //        amountPaid.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
 //            public void changedUpdate(javax.swing.event.DocumentEvent e) {
-////                updateReturnAmount();
+        ////                updateReturnAmount();
 //            }
 //
 //            public void removeUpdate(javax.swing.event.DocumentEvent e) {
@@ -229,14 +304,14 @@ public class Bills extends javax.swing.JPanel {
         // Generate a unique tab name with timestamp and bill series
         SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy-HHmm");
         String tabName = dateFormat.format(new Date()) + "-" + billSeries++;
-    
+
         // Create the main bill panel
         JPanel newBillPanel = new JPanel(new BorderLayout());
-    
+
         // Create content panel for bill components
         JPanel billContentPanel = new JPanel();
         billContentPanel.setLayout(new BorderLayout());
-    
+
         // Customer type selection
         JPanel customerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel customerTypeLabel = new JLabel("Customer Type:");
@@ -245,58 +320,58 @@ public class Bills extends javax.swing.JPanel {
         customerTypeGroup.add(walkInRadio);
         customerTypeGroup.add(regularRadio);
         walkInRadio.setSelected(true);
-    
+
         // Customer ID field
         JLabel customerLabel = new JLabel("Customer ID:");
         JTextField customerField = new JTextField("WALK-IN", 20);
         customerField.setEnabled(false);
-    
+
         // Add listeners for customer type changes
         walkInRadio.addActionListener(e -> {
             customerField.setText("WALK-IN");
             customerField.setEnabled(false);
         });
-    
+
         regularRadio.addActionListener(e -> {
             customerField.setText("");
             customerField.setEnabled(true);
         });
-    
+
         // Create the bill table with size/flavor support
         DefaultTableModel billTableModel = new DefaultTableModel(
-            new Object[][]{}, 
-            new String[]{"Item (Size, Flavor)", "Price", "Qty", "Total"}
+                new Object[][]{},
+                new String[]{"Item (Size, Flavor)", "Price", "Qty", "Total"}
         ) {
             Class[] types = new Class[]{String.class, Integer.class, Integer.class, Integer.class};
             boolean[] canEdit = new boolean[]{false, false, true, false};
-    
+
             @Override
             public Class getColumnClass(int columnIndex) {
                 return types[columnIndex];
             }
-    
+
             @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit[columnIndex];
             }
         };
-    
+
         JTable billTable = new JTable(billTableModel);
         billTable.getTableHeader().setReorderingAllowed(false);
-    
+
         // Set column widths
         billTable.getColumnModel().getColumn(0).setPreferredWidth(250);
         billTable.getColumnModel().getColumn(1).setPreferredWidth(60);
         billTable.getColumnModel().getColumn(2).setPreferredWidth(40);
         billTable.getColumnModel().getColumn(3).setPreferredWidth(60);
-    
+
         // Add listener for quantity changes
         billTableModel.addTableModelListener(e -> {
             if (e.getColumn() == 2) {
                 updateBillTotals(tabName);
             }
         });
-    
+
         // Grand total display
         JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JLabel grandTotalLabel = new JLabel("Grand Total:");
@@ -304,7 +379,7 @@ public class Bills extends javax.swing.JPanel {
         JLabel grandTotalValue = new JLabel("0.00");
         grandTotalValue.setFont(new Font("Segoe UI", Font.BOLD, 14));
         grandTotalValue.setBorder(BorderFactory.createEtchedBorder());
-    
+
         // Payment section
         JPanel paymentPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         paymentPanel.add(new JLabel("Amount Paid:"));
@@ -314,13 +389,21 @@ public class Bills extends javax.swing.JPanel {
         JLabel changeDueLabel = new JLabel("0.00");
         changeDueLabel.setBorder(BorderFactory.createEtchedBorder());
         paymentPanel.add(changeDueLabel);
-    
+
         // Add document listener to calculate change
         amountPaidField.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) { updateChange(); }
-            public void removeUpdate(DocumentEvent e) { updateChange(); }
-            public void insertUpdate(DocumentEvent e) { updateChange(); }
-            
+            public void changedUpdate(DocumentEvent e) {
+                updateChange();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                updateChange();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                updateChange();
+            }
+
             private void updateChange() {
                 try {
                     double paid = Double.parseDouble(amountPaidField.getText());
@@ -332,35 +415,35 @@ public class Bills extends javax.swing.JPanel {
                 }
             }
         });
-    
+
         // Assemble customer panel
         customerPanel.add(customerTypeLabel);
         customerPanel.add(walkInRadio);
         customerPanel.add(regularRadio);
         customerPanel.add(customerLabel);
         customerPanel.add(customerField);
-    
+
         // Assemble the bill content panel
         billContentPanel.add(customerPanel, BorderLayout.NORTH);
         billContentPanel.add(new JScrollPane(billTable), BorderLayout.CENTER);
-        
+
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.add(totalPanel, BorderLayout.NORTH);
         bottomPanel.add(paymentPanel, BorderLayout.CENTER);
-        
+
         totalPanel.add(grandTotalLabel);
         totalPanel.add(grandTotalValue);
-        
+
         billContentPanel.add(bottomPanel, BorderLayout.SOUTH);
-    
+
         // Add everything to the main panel
         newBillPanel.add(billContentPanel, BorderLayout.CENTER);
-    
+
         // Store references for later use
         billTableModels.put(tabName, billTableModel);
         billPanels.put(tabName, newBillPanel);
         billGrandTotals.put(tabName, grandTotalValue);
-    
+
         // Add the new tab
         jTabbedPane1.addTab(tabName, newBillPanel);
         jTabbedPane1.setSelectedIndex(jTabbedPane1.getTabCount() - 1);
@@ -369,27 +452,27 @@ public class Bills extends javax.swing.JPanel {
     private void deleteCurrentBill() {
         int selectedIndex = jTabbedPane1.getSelectedIndex();
         if (selectedIndex == -1) {
-            JOptionPane.showMessageDialog(this, 
-                "No bill selected to delete", 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "No bill selected to delete",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
-    
+
         int confirm = JOptionPane.showConfirmDialog(
-            this,
-            "Delete current bill?",
-            "Confirm Delete",
-            JOptionPane.YES_NO_OPTION
+                this,
+                "Delete current bill?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
         );
-    
+
         if (confirm == JOptionPane.YES_OPTION) {
             String tabName = jTabbedPane1.getTitleAt(selectedIndex);
             billTableModels.remove(tabName);
             billPanels.remove(tabName);
             billGrandTotals.remove(tabName);
             jTabbedPane1.remove(selectedIndex);
-    
+
             // If no bills left, create a new one
             if (jTabbedPane1.getTabCount() == 0) {
                 addNewBill();
@@ -404,12 +487,13 @@ public class Bills extends javax.swing.JPanel {
         if ("All".equals(selectedCategory)) {
             for (List<Product> products : categoryProductsMap.values()) {
                 for (Product product : products) {
+                    String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                     productsTableModel.addRow(new Object[]{
                         product.id,
                         product.name,
-                        product.price,
-                        product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "",
-                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : ""
+                        product.getPriceForSize(defaultSize),
+                        defaultSize,
+                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                     });
                 }
             }
@@ -417,12 +501,13 @@ public class Bills extends javax.swing.JPanel {
             List<Product> products = categoryProductsMap.get(selectedCategory);
             if (products != null) {
                 for (Product product : products) {
+                    String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                     productsTableModel.addRow(new Object[]{
                         product.id,
                         product.name,
-                        product.price,
-                        product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "",
-                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : ""
+                        product.getPriceForSize(defaultSize),
+                        defaultSize,
+                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                     });
                 }
             }
@@ -430,7 +515,6 @@ public class Bills extends javax.swing.JPanel {
     }
 
     private void addProductToBill() {
-        // First check if any bill exists
         if (jTabbedPane1.getTabCount() == 0) {
             JOptionPane.showMessageDialog(this,
                     "Please create a bill first before adding products",
@@ -454,31 +538,28 @@ public class Bills extends javax.swing.JPanel {
         try {
             String productId = (String) jTable1.getValueAt(selectedRow, 0);
             String productName = (String) jTable1.getValueAt(selectedRow, 1);
-            int price = (Integer) jTable1.getValueAt(selectedRow, 2);
+            int price = (Integer) jTable1.getValueAt(selectedRow, 2); // Size-specific price
             String size = (String) jTable1.getValueAt(selectedRow, 3);
             String flavor = (String) jTable1.getValueAt(selectedRow, 4);
 
-            // Validate size and flavor selection
-            if (size == null || size.isEmpty()) {
+            if (size == null || size.isEmpty() || size.equals("N/A")) {
                 JOptionPane.showMessageDialog(this,
-                        "Please select a size for the product",
+                        "Please select a valid size for the product",
                         "Size Required",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            if (flavor == null || flavor.isEmpty()) {
+            if (flavor == null || flavor.isEmpty() || flavor.equals("N/A")) {
                 JOptionPane.showMessageDialog(this,
-                        "Please select a flavor for the product",
+                        "Please select a valid flavor for the product",
                         "Flavor Required",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Format the display name with size and flavor
             String displayName = String.format("%s (%s, %s)", productName, size, flavor);
 
-            // Check if product with same size/flavor already exists in bill
             for (int i = 0; i < billModel.getRowCount(); i++) {
                 String existingItem = (String) billModel.getValueAt(i, 0);
                 if (existingItem.equals(displayName)) {
@@ -489,14 +570,7 @@ public class Bills extends javax.swing.JPanel {
                 }
             }
 
-            // Add new product to bill
-            billModel.addRow(new Object[]{
-                displayName, // Formatted name with size/flavor
-                price, // Original price
-                1, // Initial quantity
-                price // Initial total (price * 1)
-            });
-
+            billModel.addRow(new Object[]{displayName, price, 1, price});
             updateBillTotals(currentTab);
 
         } catch (Exception e) {
@@ -748,8 +822,6 @@ public class Bills extends javax.swing.JPanel {
         }
     }
 
-    
-
     // NumericDocument class to filter non-numeric input
     class NumericDocument extends javax.swing.text.PlainDocument {
 
@@ -804,34 +876,34 @@ public class Bills extends javax.swing.JPanel {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        Categories.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        Categories.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Item 1", "Item 2", "Item 3", "Item 4"}));
 
         lbcat.setText("Categories:");
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "ID", "Name", "Price"
-            }
+                new Object[][]{
+                    {null, null, null},
+                    {null, null, null},
+                    {null, null, null},
+                    {null, null, null}
+                },
+                new String[]{
+                    "ID", "Name", "Price"
+                }
         ) {
-            Class[] types = new Class [] {
+            Class[] types = new Class[]{
                 java.lang.String.class, java.lang.String.class, java.lang.Integer.class
             };
-            boolean[] canEdit = new boolean [] {
+            boolean[] canEdit = new boolean[]{
                 false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         jTable1.getTableHeader().setReorderingAllowed(false);
@@ -840,31 +912,31 @@ public class Bills extends javax.swing.JPanel {
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(lbcat, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(Categories, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)
+                                        .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                                                .addComponent(lbcat, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(Categories, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE)))
+                                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Categories, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lbcat, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE)
-                .addContainerGap())
+                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(Categories, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lbcat, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE)
+                                .addContainerGap())
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -883,31 +955,31 @@ public class Bills extends javax.swing.JPanel {
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(removeProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(printBill, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator5)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(removeProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(printBill, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jSeparator5)
+                                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(removeProduct)
-                .addGap(18, 18, 18)
-                .addComponent(jButton1)
-                .addGap(23, 23, 23)
-                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44)
-                .addComponent(printBill)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(removeProduct)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButton1)
+                                .addGap(23, 23, 23)
+                                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(44, 44, 44)
+                                .addComponent(printBill)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -924,60 +996,60 @@ public class Bills extends javax.swing.JPanel {
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator4)
-                    .addComponent(addBill, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(deleteBill, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE))
-                .addContainerGap())
+                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jSeparator4)
+                                        .addComponent(addBill, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(deleteBill, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE))
+                                .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(deleteBill)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(addBill)
-                .addGap(10, 10, 10))
+                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(deleteBill)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(addBill)
+                                .addGap(10, 10, 10))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lb, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(lb, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(lb)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(lb)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addContainerGap())
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
     }// </editor-fold>//GEN-END:initComponents
 
