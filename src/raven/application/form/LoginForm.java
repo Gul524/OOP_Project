@@ -206,15 +206,15 @@ public class LoginForm extends javax.swing.JPanel {
 //        // Execute the SwingWorker
 //        worker.execute();
 
-//        if (("staff").equals(user)) {
-//            Application.loginStaff();
-//            System.out.println("Staff login");
-//        }
-//        else if (("admin").equals(user)) {
-//            Application.login();
-//        }
+        if (("staff").equals(user)) {
+            Application.loginStaff();
+            System.out.println("Staff login");
+        }
+        else if (("admin").equals(user)) {
+            Application.login();
+        }
 
-          ApiClient.login(user, password);
+//          ApiClient.login(user, password);
     }//GEN-LAST:event_cmdLoginActionPerformed
 
 

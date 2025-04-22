@@ -1,30 +1,32 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import java.awt.Dimension;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -42,15 +44,18 @@ public class Bills extends javax.swing.JPanel {
     private ButtonGroup customerTypeGroup = new ButtonGroup();
 
     class Product {
-
         String id;
         String name;
         int price;
-
-        public Product(String id, String name, int price) {
+        List<String> sizes;
+        List<String> flavors;
+    
+        public Product(String id, String name, int price, List<String> pizzaSizes, List<String> pizzaFlavors) {
             this.id = id;
             this.name = name;
             this.price = price;
+            this.sizes = pizzaSizes; // Correct assignment
+            this.flavors = pizzaFlavors; // Correct assignment
         }
     }
 
@@ -60,44 +65,108 @@ public class Bills extends javax.swing.JPanel {
         initializeData();
         setupProductsTable();
         setupEventListeners();
-        amountPaid.setDocument(new NumericDocument());
+//        amountPaid.setDocument(new NumericDocument());
     }
 
     private void initializeData() {
         categoryProductsMap = new HashMap<>();
-
-        List<Product> electronics = new ArrayList<>();
-        electronics.add(new Product("E001", "Laptop", 1200));
-        electronics.add(new Product("E002", "Smartphone", 800));
-        electronics.add(new Product("E003", "Headphones", 150));
-
-        List<Product> clothing = new ArrayList<>();
-        clothing.add(new Product("C001", "T-Shirt", 25));
-        clothing.add(new Product("C002", "Jeans", 50));
-        clothing.add(new Product("C003", "Jacket", 80));
-
-        List<Product> grocery = new ArrayList<>();
-        grocery.add(new Product("G001", "Milk", 3));
-        grocery.add(new Product("G002", "Bread", 2));
-        grocery.add(new Product("G003", "Eggs", 4));
-
-        categoryProductsMap.put("Electronics", electronics);
-        categoryProductsMap.put("Clothing", clothing);
-        categoryProductsMap.put("Grocery", grocery);
-
-        Categories.setModel(new DefaultComboBoxModel<>(new String[]{"All", "Electronics", "Clothing", "Grocery"}));
+    
+        List<Product> pizzas = new ArrayList<>();
+        List<String> pizzaSizes = Arrays.asList("Small", "Medium", "Large");
+        List<String> pizzaFlavors = Arrays.asList("Pepperoni", "Fajita", "Vegetarian");
+        pizzas.add(new Product("P001", "Pizza", 1200, pizzaSizes, pizzaFlavors));
+    
+        List<Product> drinks = new ArrayList<>();
+        List<String> drinkSizes = Arrays.asList("300ML", "500ML", "1L");
+        List<String> drinkFlavors = Arrays.asList("Cola", "Lemon", "Orange");
+        drinks.add(new Product("D001", "Soft Drink", 150, drinkSizes, drinkFlavors));
+    
+        List<Product> burgers = new ArrayList<>();
+        List<String> burgerSizes = Arrays.asList("Small", "Medium", "Large");
+        List<String> burgerFlavors = Arrays.asList("Zinger", "Double Zinger", "Dhamaka");
+        burgers.add(new Product("B001", "Burger", 350, burgerSizes, burgerFlavors));
+    
+        categoryProductsMap.put("Pizzas", pizzas);
+        categoryProductsMap.put("Drinks", drinks);
+        categoryProductsMap.put("Burgers", burgers);
+    
+        Categories.setModel(new DefaultComboBoxModel<>(new String[]{"All", "Pizzas", "Drinks", "Burgers"}));
     }
-
+    
     private void setupProductsTable() {
-        productsTableModel = (DefaultTableModel) jTable1.getModel();
-        productsTableModel.setRowCount(0);
-
+        // Update column names
+        productsTableModel = new DefaultTableModel(
+            new Object[][]{},
+            new String[]{"ID", "Name", "Price", "Size", "Flavor"}
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 3 || column == 4; // Only Size and Flavor are editable
+            }
+        };
+    
+        jTable1.setModel(productsTableModel);
+    
+        // Set custom editors for Size and Flavor columns
+        jTable1.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JComboBox<>()));
+        jTable1.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JComboBox<>()));
+    
+        // Populate table with products from all categories
         for (List<Product> products : categoryProductsMap.values()) {
             for (Product product : products) {
-                productsTableModel.addRow(new Object[]{product.id, product.name, product.price});
+                productsTableModel.addRow(new Object[]{
+                    product.id,
+                    product.name,
+                    product.price,
+                    product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "",
+                    product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : ""
+                });
             }
         }
-        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    
+        // Add selection listener to update dropdowns when row is selected
+        jTable1.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = jTable1.getSelectedRow();
+                if (row >= 0) {
+                    String productId = (String) jTable1.getValueAt(row, 0);
+                    Product product = findProductById(productId);
+    
+                    if (product != null) {
+                        // Update size dropdown
+                        JComboBox<String> sizeCombo = new JComboBox<>(
+                            product.sizes != null && !product.sizes.isEmpty()
+                                ? product.sizes.toArray(new String[0])
+                                : new String[]{"N/A"}
+                        );
+                        jTable1.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(sizeCombo));
+    
+                        // Update flavor dropdown
+                        JComboBox<String> flavorCombo = new JComboBox<>(
+                            product.flavors != null && !product.flavors.isEmpty()
+                                ? product.flavors.toArray(new String[0])
+                                : new String[]{"N/A"}
+                        );
+                        jTable1.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(flavorCombo));
+                    }
+                }
+            }
+        });
+    }
+    
+    
+    // Helper method to find product by ID
+    private Product findProductById(String id) {
+        for (List<Product> products : categoryProductsMap.values()) {
+            if (products != null) {
+                for (Product product : products) {
+                    if (product.id.equals(id)) {
+                        return product;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void setupEventListeners() {
@@ -108,19 +177,19 @@ public class Bills extends javax.swing.JPanel {
         jButton1.addActionListener(e -> removeAllProducts());
         deleteBill.addActionListener(e -> deleteCurrentBill());
 
-        amountPaid.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                updateReturnAmount();
-            }
-
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                updateReturnAmount();
-            }
-
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                updateReturnAmount();
-            }
-        });
+//        amountPaid.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+//            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+////                updateReturnAmount();
+//            }
+//
+//            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+////                updateReturnAmount();
+//            }
+//
+//            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+////                updateReturnAmount();
+//            }
+//        });
 
         // Update the mouse listener to handle errors
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -157,140 +226,171 @@ public class Bills extends javax.swing.JPanel {
     }
 
     private void addNewBill() {
+        // Generate a unique tab name with timestamp and bill series
         SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy-HHmm");
         String tabName = dateFormat.format(new Date()) + "-" + billSeries++;
-
-        JPanel newBillPanel = new JPanel();
-        newBillPanel.setLayout(new java.awt.BorderLayout());
-
+    
+        // Create the main bill panel
+        JPanel newBillPanel = new JPanel(new BorderLayout());
+    
+        // Create content panel for bill components
         JPanel billContentPanel = new JPanel();
+        billContentPanel.setLayout(new BorderLayout());
+    
+        // Customer type selection
+        JPanel customerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel customerTypeLabel = new JLabel("Customer Type:");
         JRadioButton walkInRadio = new JRadioButton("Walk-in");
         JRadioButton regularRadio = new JRadioButton("Regular");
         customerTypeGroup.add(walkInRadio);
         customerTypeGroup.add(regularRadio);
         walkInRadio.setSelected(true);
-
+    
+        // Customer ID field
         JLabel customerLabel = new JLabel("Customer ID:");
-        JTextField customerField = new JTextField("WALK-IN");
+        JTextField customerField = new JTextField("WALK-IN", 20);
         customerField.setEnabled(false);
-
+    
+        // Add listeners for customer type changes
         walkInRadio.addActionListener(e -> {
             customerField.setText("WALK-IN");
             customerField.setEnabled(false);
         });
-
+    
         regularRadio.addActionListener(e -> {
             customerField.setText("");
             customerField.setEnabled(true);
         });
-
-        JLabel grandTotalLabel = new JLabel("Grand Total:");
-        grandTotalLabel.setFont(new java.awt.Font("Segoe UI Black", 1, 18));
-        JLabel grandTotalValue = new JLabel("00");
-        grandTotalValue.setFont(new java.awt.Font("Segoe UI Black", 1, 18));
-        grandTotalValue.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
+    
+        // Create the bill table with size/flavor support
         DefaultTableModel billTableModel = new DefaultTableModel(
-                new Object[][]{}, new String[]{"Name", "Price", "Quantity", "Total"}
+            new Object[][]{}, 
+            new String[]{"Item (Size, Flavor)", "Price", "Qty", "Total"}
         ) {
             Class[] types = new Class[]{String.class, Integer.class, Integer.class, Integer.class};
             boolean[] canEdit = new boolean[]{false, false, true, false};
-
+    
+            @Override
             public Class getColumnClass(int columnIndex) {
                 return types[columnIndex];
             }
-
+    
+            @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit[columnIndex];
             }
         };
-
+    
         JTable billTable = new JTable(billTableModel);
         billTable.getTableHeader().setReorderingAllowed(false);
+    
+        // Set column widths
+        billTable.getColumnModel().getColumn(0).setPreferredWidth(250);
+        billTable.getColumnModel().getColumn(1).setPreferredWidth(60);
+        billTable.getColumnModel().getColumn(2).setPreferredWidth(40);
+        billTable.getColumnModel().getColumn(3).setPreferredWidth(60);
+    
+        // Add listener for quantity changes
         billTableModel.addTableModelListener(e -> {
             if (e.getColumn() == 2) {
                 updateBillTotals(tabName);
             }
         });
-
-        JScrollPane scrollPane = new JScrollPane(billTable);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(billContentPanel);
-        billContentPanel.setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(customerTypeLabel)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(walkInRadio)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(regularRadio))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(customerLabel)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(customerField, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(grandTotalLabel)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(grandTotalValue, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(26, 26, 26)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(customerTypeLabel)
-                                        .addComponent(walkInRadio)
-                                        .addComponent(regularRadio))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(customerLabel)
-                                        .addComponent(customerField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(grandTotalLabel)
-                                        .addComponent(grandTotalValue))
-                                .addContainerGap(49, Short.MAX_VALUE))
-        );
-
-        newBillPanel.add(billContentPanel, java.awt.BorderLayout.CENTER);
+    
+        // Grand total display
+        JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JLabel grandTotalLabel = new JLabel("Grand Total:");
+        grandTotalLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JLabel grandTotalValue = new JLabel("0.00");
+        grandTotalValue.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        grandTotalValue.setBorder(BorderFactory.createEtchedBorder());
+    
+        // Payment section
+        JPanel paymentPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        paymentPanel.add(new JLabel("Amount Paid:"));
+        JTextField amountPaidField = new JTextField("0.00");
+        paymentPanel.add(amountPaidField);
+        paymentPanel.add(new JLabel("Change Due:"));
+        JLabel changeDueLabel = new JLabel("0.00");
+        changeDueLabel.setBorder(BorderFactory.createEtchedBorder());
+        paymentPanel.add(changeDueLabel);
+    
+        // Add document listener to calculate change
+        amountPaidField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { updateChange(); }
+            public void removeUpdate(DocumentEvent e) { updateChange(); }
+            public void insertUpdate(DocumentEvent e) { updateChange(); }
+            
+            private void updateChange() {
+                try {
+                    double paid = Double.parseDouble(amountPaidField.getText());
+                    double total = Double.parseDouble(grandTotalValue.getText());
+                    double change = Math.max(0, paid - total);
+                    changeDueLabel.setText(String.format("%.2f", change));
+                } catch (NumberFormatException ex) {
+                    changeDueLabel.setText("0.00");
+                }
+            }
+        });
+    
+        // Assemble customer panel
+        customerPanel.add(customerTypeLabel);
+        customerPanel.add(walkInRadio);
+        customerPanel.add(regularRadio);
+        customerPanel.add(customerLabel);
+        customerPanel.add(customerField);
+    
+        // Assemble the bill content panel
+        billContentPanel.add(customerPanel, BorderLayout.NORTH);
+        billContentPanel.add(new JScrollPane(billTable), BorderLayout.CENTER);
+        
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(totalPanel, BorderLayout.NORTH);
+        bottomPanel.add(paymentPanel, BorderLayout.CENTER);
+        
+        totalPanel.add(grandTotalLabel);
+        totalPanel.add(grandTotalValue);
+        
+        billContentPanel.add(bottomPanel, BorderLayout.SOUTH);
+    
+        // Add everything to the main panel
+        newBillPanel.add(billContentPanel, BorderLayout.CENTER);
+    
+        // Store references for later use
         billTableModels.put(tabName, billTableModel);
         billPanels.put(tabName, newBillPanel);
         billGrandTotals.put(tabName, grandTotalValue);
+    
+        // Add the new tab
         jTabbedPane1.addTab(tabName, newBillPanel);
         jTabbedPane1.setSelectedIndex(jTabbedPane1.getTabCount() - 1);
-        updateReturnAmount();
     }
 
     private void deleteCurrentBill() {
         int selectedIndex = jTabbedPane1.getSelectedIndex();
         if (selectedIndex == -1) {
-            JOptionPane.showMessageDialog(this, "No bill selected to delete", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "No bill selected to delete", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+    
         int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Delete current bill?",
-                "Confirm Delete",
-                JOptionPane.YES_NO_OPTION
+            this,
+            "Delete current bill?",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION
         );
-
+    
         if (confirm == JOptionPane.YES_OPTION) {
             String tabName = jTabbedPane1.getTitleAt(selectedIndex);
             billTableModels.remove(tabName);
             billPanels.remove(tabName);
             billGrandTotals.remove(tabName);
             jTabbedPane1.remove(selectedIndex);
-
+    
+            // If no bills left, create a new one
             if (jTabbedPane1.getTabCount() == 0) {
                 addNewBill();
             }
@@ -300,18 +400,30 @@ public class Bills extends javax.swing.JPanel {
     private void filterProductsByCategory() {
         String selectedCategory = (String) Categories.getSelectedItem();
         productsTableModel.setRowCount(0);
-
+    
         if ("All".equals(selectedCategory)) {
             for (List<Product> products : categoryProductsMap.values()) {
                 for (Product product : products) {
-                    productsTableModel.addRow(new Object[]{product.id, product.name, product.price});
+                    productsTableModel.addRow(new Object[]{
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "",
+                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : ""
+                    });
                 }
             }
         } else {
             List<Product> products = categoryProductsMap.get(selectedCategory);
             if (products != null) {
                 for (Product product : products) {
-                    productsTableModel.addRow(new Object[]{product.id, product.name, product.price});
+                    productsTableModel.addRow(new Object[]{
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "",
+                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : ""
+                    });
                 }
             }
         }
@@ -340,12 +452,36 @@ public class Bills extends javax.swing.JPanel {
         DefaultTableModel billModel = billTableModels.get(currentTab);
 
         try {
+            String productId = (String) jTable1.getValueAt(selectedRow, 0);
             String productName = (String) jTable1.getValueAt(selectedRow, 1);
             int price = (Integer) jTable1.getValueAt(selectedRow, 2);
+            String size = (String) jTable1.getValueAt(selectedRow, 3);
+            String flavor = (String) jTable1.getValueAt(selectedRow, 4);
 
-            // Check if product exists in bill
+            // Validate size and flavor selection
+            if (size == null || size.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Please select a size for the product",
+                        "Size Required",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (flavor == null || flavor.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Please select a flavor for the product",
+                        "Flavor Required",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Format the display name with size and flavor
+            String displayName = String.format("%s (%s, %s)", productName, size, flavor);
+
+            // Check if product with same size/flavor already exists in bill
             for (int i = 0; i < billModel.getRowCount(); i++) {
-                if (productName.equals(billModel.getValueAt(i, 0))) {
+                String existingItem = (String) billModel.getValueAt(i, 0);
+                if (existingItem.equals(displayName)) {
                     int quantity = (Integer) billModel.getValueAt(i, 2);
                     billModel.setValueAt(quantity + 1, i, 2);
                     updateBillTotals(currentTab);
@@ -353,8 +489,14 @@ public class Bills extends javax.swing.JPanel {
                 }
             }
 
-            // Add new product
-            billModel.addRow(new Object[]{productName, price, 1, price});
+            // Add new product to bill
+            billModel.addRow(new Object[]{
+                displayName, // Formatted name with size/flavor
+                price, // Original price
+                1, // Initial quantity
+                price // Initial total (price * 1)
+            });
+
             updateBillTotals(currentTab);
 
         } catch (Exception e) {
@@ -383,7 +525,6 @@ public class Bills extends javax.swing.JPanel {
         }
 
         grandTotalLabel.setText(String.valueOf(total));
-        updateReturnAmount();
     }
 
     private void printCurrentBill() {
@@ -439,7 +580,7 @@ public class Bills extends javax.swing.JPanel {
                 int qty = (Integer) model.getValueAt(i, 2);
                 int total = (Integer) model.getValueAt(i, 3);
 
-                billContent.append(String.format("%-16.16s %5d %3d %6d\n",
+                billContent.append(String.format("%-20s %5d %3d %6d\n",
                         item, price, qty, total));
             }
 
@@ -582,7 +723,6 @@ public class Bills extends javax.swing.JPanel {
 
             model.removeRow(selectedRow);
             updateBillTotals(currentTab);
-            updateReturnAmount();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error removing product: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -608,34 +748,7 @@ public class Bills extends javax.swing.JPanel {
         }
     }
 
-    private void updateReturnAmount() {
-        try {
-            String currentTab = jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex());
-            if (currentTab == null) {
-                return;
-            }
-
-            JLabel grandTotalLabel = billGrandTotals.get(currentTab);
-            if (grandTotalLabel == null) {
-                return;
-            }
-
-            // Get current grand total
-            String totalText = grandTotalLabel.getText();
-            int grandTotal = totalText.equals("00") ? 0 : Integer.parseInt(totalText);
-
-            // Get paid amount (default to 0 if empty)
-            String paidText = amountPaid.getText().trim();
-            int paidAmount = paidText.isEmpty() ? 0 : Integer.parseInt(paidText);
-
-            // Calculate return amount (never negative)
-            int returnAmount = Math.max(paidAmount - grandTotal, 0);
-            jLabel5.setText(String.valueOf(returnAmount));
-
-        } catch (NumberFormatException e) {
-            jLabel5.setText("0");
-        }
-    }
+    
 
     // NumericDocument class to filter non-numeric input
     class NumericDocument extends javax.swing.text.PlainDocument {
@@ -679,11 +792,6 @@ public class Bills extends javax.swing.JPanel {
         removeProduct = new javax.swing.JButton();
         jSeparator5 = new javax.swing.JSeparator();
         jButton1 = new javax.swing.JButton();
-        jLabel3 = new javax.swing.JLabel();
-        amountPaid = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        jSeparator6 = new javax.swing.JSeparator();
-        jLabel5 = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
         addBill = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
@@ -755,7 +863,7 @@ public class Bills extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -772,20 +880,6 @@ public class Bills extends javax.swing.JPanel {
 
         jButton1.setText("Remove All Products");
 
-        jLabel3.setText("Total Amount Paid:");
-
-        amountPaid.setText("00");
-        amountPaid.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                amountPaidActionPerformed(evt);
-            }
-        });
-
-        jLabel4.setText("Amount to be Returned:");
-
-        jLabel5.setText("00");
-        jLabel5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -793,19 +887,11 @@ public class Bills extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(removeProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(printBill, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator5)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(amountPaid, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator6)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -819,19 +905,9 @@ public class Bills extends javax.swing.JPanel {
                 .addComponent(jButton1)
                 .addGap(23, 23, 23)
                 .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(amountPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator6, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(44, 44, 44)
                 .addComponent(printBill)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -900,48 +976,24 @@ public class Bills extends javax.swing.JPanel {
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 120, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void printBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printBillActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_printBillActionPerformed
 
     private void deleteBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBillActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_deleteBillActionPerformed
 
-    private void amountPaidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_amountPaidActionPerformed
+    private void printBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printBillActionPerformed
         // TODO add your handling code here:
-        amountPaid.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                    try {
-                        updateReturnAmount();
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(Bills.this,
-                                "Failed to add product: " + ex.getMessage(),
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-    }//GEN-LAST:event_amountPaidActionPerformed
+    }//GEN-LAST:event_printBillActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> Categories;
     private javax.swing.JButton addBill;
-    private javax.swing.JTextField amountPaid;
     private javax.swing.JButton deleteBill;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
@@ -950,7 +1002,6 @@ public class Bills extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
-    private javax.swing.JSeparator jSeparator6;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JLabel lb;
