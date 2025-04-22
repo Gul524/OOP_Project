@@ -7,9 +7,15 @@ package logic;
 import com.google.gson.JsonObject;
 import java.io.*;
 import java.net.*;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import models.TokenResponse;
+import models.ProductModel;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 
 /**
  *
@@ -17,7 +23,7 @@ import models.TokenResponse;
  */
 public class ApiClient {
 
-    static String baseURL = "http://localhost:8099";
+    static String baseURL = "http://localhost:8080";
     static String _token;
 
     //Send Data Function
@@ -31,7 +37,7 @@ public class ApiClient {
             Logger.getLogger(ApiClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public static void login(String username, String password) {
         try {
             JsonObject json = new JsonObject();
@@ -49,7 +55,7 @@ public class ApiClient {
 
             //Send Data
             sendData(conn, jsonInputString);
-            
+
             //read-response
             int status = conn.getResponseCode();
             InputStream is = (status < 400) ? conn.getInputStream() : conn.getErrorStream();
@@ -63,6 +69,7 @@ public class ApiClient {
             in.close();
 
             TokenResponse token = TokenResponse.fromJson(response.toString());
+
             System.out.println(token.getToken());
             _token = token.getToken();
 
@@ -73,6 +80,35 @@ public class ApiClient {
     }
 
     public static void main(String[] args) {
-        login("api", "123");
+        try {
+
+            String apiUrl = "http://localhost:8080/resApi/products/products"; // Example API
+
+            URL url = new URL(apiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // Read the response
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream())
+            );
+
+            String line;
+            StringBuilder response = new StringBuilder();
+
+            while ((line = reader.readLine()) != null) {
+                response.append(line).append("\n");
+            }
+
+            reader.close();
+
+            // Print the response
+            System.out.println("Response from API:");
+            System.out.println(response.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 }
