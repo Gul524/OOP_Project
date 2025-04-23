@@ -4,31 +4,15 @@ package raven.application.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.ComponentOrientation;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import raven.application.Application;
-import raven.application.form.other.FormCategories;
-import raven.application.form.other.FormDashboard;
-import raven.application.form.other.FormStaff;
-import raven.application.form.other.FormMenu;
-import raven.application.form.other.FormInventory;
-import raven.application.form.other.Bills;
-import raven.application.form.other.FormProducts;
-import raven.application.form.other.FormReports;
-import raven.application.form.other.PasswordUpdate;
-import raven.application.form.other.UserPanel;
+import raven.application.form.other.*;
 import raven.menu.Menu;
 import raven.menu.MenuAction;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  *

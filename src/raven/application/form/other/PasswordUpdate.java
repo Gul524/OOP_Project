@@ -1,10 +1,10 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import javax.swing.JOptionPane;
 import logic.AuthService;
-import raven.application.form.LoginForm;
 import raven.toast.Notifications;
+
+import javax.swing.*;
 
 /**
  *

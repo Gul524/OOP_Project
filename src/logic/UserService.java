@@ -1,13 +1,11 @@
 package logic;
 
+import org.mindrot.jbcrypt.BCrypt;
+
+import javax.swing.table.DefaultTableModel;
 import java.sql.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
-import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
 

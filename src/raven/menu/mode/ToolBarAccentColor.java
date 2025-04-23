@@ -3,26 +3,16 @@ package raven.menu.mode;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.icons.FlatAbstractIcon;
-import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.ColorFunctions;
 import com.formdev.flatlaf.util.LoggingFacade;
 import com.formdev.flatlaf.util.UIScale;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.util.Collections;
-import javax.swing.ButtonGroup;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import raven.menu.Menu;
 import raven.staffMenu.StaffMenu;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.Collections;
 
 /**
  *

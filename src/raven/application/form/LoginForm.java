@@ -1,14 +1,11 @@
 package raven.application.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.Timer;
-import logic.ApiClient;
 import net.miginfocom.swing.MigLayout;
 import raven.application.Application;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  *

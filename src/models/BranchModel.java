@@ -90,17 +90,4 @@ public class BranchModel {
         this.uploaded = uploaded;
     }
 
-    // toString method
-    @Override
-    public String toString() {
-        return "BranchModel{" +
-                "id=" + id +
-                ", companyId=" + companyId +
-                ", name='" + name + '\'' +
-                ", startTiming='" + startTiming + '\'' +
-                ", endTime='" + endTime + '\'' +
-                ", phone='" + phone + '\'' +
-                ", uploaded=" + uploaded +
-                '}';
-    }
 }

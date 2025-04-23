@@ -1,11 +1,12 @@
 package logic;
 
+import org.mindrot.jbcrypt.BCrypt;
+
+import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
-import javax.swing.*;
-import org.mindrot.jbcrypt.BCrypt;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AuthService {
 

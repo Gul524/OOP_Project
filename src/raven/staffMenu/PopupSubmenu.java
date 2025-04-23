@@ -1,25 +1,12 @@
 package raven.staffMenu;
 
-import raven.menu.*;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
-import java.awt.BasicStroke;
-import java.awt.Component;
-import java.awt.ComponentOrientation;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Path2D;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 
 /**
  *

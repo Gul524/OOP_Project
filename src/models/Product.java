@@ -1,13 +1,15 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import models.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
+@AllArgsConstructor
 public class Product {
     public int id;
     public Category category;
@@ -21,4 +23,5 @@ public class Product {
     public List<Size> sizes;
     public List<Flavour> flavours;
     public List<Deal> deals;
+
 }

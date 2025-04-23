@@ -4,23 +4,12 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Path2D;
 import java.util.List;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
 
 /**
  *

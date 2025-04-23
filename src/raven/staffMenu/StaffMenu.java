@@ -1,23 +1,15 @@
 package raven.staffMenu;
 
-import raven.staffMenu.*;
-import raven.menu.mode.LightDarkMode;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.LayoutManager;
+import raven.menu.mode.LightDarkMode;
+import raven.menu.mode.ToolBarAccentColor;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import raven.menu.mode.ToolBarAccentColor;
 
 /**
  *

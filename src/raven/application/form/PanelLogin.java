@@ -1,8 +1,9 @@
 package raven.application.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
 
 /**
  *
