@@ -7,15 +7,12 @@ package logic;
 import com.google.gson.JsonObject;
 import java.io.*;
 import java.net.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import models.TokenResponse;
-import models.ProductModel;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import models.*;
 
 /**
  *
@@ -79,36 +76,57 @@ public class ApiClient {
         }
     }
 
-    public static void main(String[] args) {
-        try {
+    public static List<Product> products() {
+    List<Product> products = new ArrayList<>();
+    try {
+        String apiUrl = baseURL + "/resApi/products/products"; // Verify this endpoint
+        URL url = new URL(apiUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setConnectTimeout(5000);
+        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 
-            String apiUrl = "http://localhost:8080/resApi/products/products"; // Example API
-
-            URL url = new URL(apiUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            // Read the response
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream())
-            );
-
-            String line;
-            StringBuilder response = new StringBuilder();
-
-            while ((line = reader.readLine()) != null) {
-                response.append(line).append("\n");
-            }
-
-            reader.close();
-
-            // Print the response
-            System.out.println("Response from API:");
-            System.out.println(response.toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        // Add Authorization header if token is required
+        if (_token != null && !_token.isEmpty()) {
+            conn.setRequestProperty("Authorization", "Bearer " + _token);
         }
+
+        // Check HTTP status code
+        int status = conn.getResponseCode();
+        InputStream inputStream = (status < 400) ? conn.getInputStream() : conn.getErrorStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
+
+        StringBuilder responseFetched = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            responseFetched.append(line);
+        }
+        reader.close();
+        conn.disconnect();
+
+        // Log the response for debugging
+        System.out.println("Response from API: " + responseFetched.toString());
+
+        // Deserialize JSON to ProductResponse
+        ObjectMapper mapper = new ObjectMapper();
+        ProductResponse response = mapper.readValue(responseFetched.toString(), ProductResponse.class);
+
+        // Check if the response is successful and data is present
+        if (response.isSuccess() && response.getData() != null) {
+            products.addAll(response.getData());
+            System.out.println("Products retrieved: " + products.size());
+        } else {
+            System.out.println("No products found or API failed: " + response.getMessage());
+        }
+
         
+    } catch (Exception e) {
+        Logger.getLogger(ApiClient.class.getName()).log(Level.SEVERE, "Failed to fetch products", e);
+    }
+    return products;
+}
+
+    public static void main(String[] args) {
+        System.out.println(products());
     }
 }
