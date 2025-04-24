@@ -10,6 +10,8 @@
 <project name="OOP_Project" default="default" basedir=".">
     <description>Builds, tests, and runs the project OOP_Project.</description>
     <import file="nbproject/build-impl.xml"/>
+    <property name="javac.source" value="17"/>
+    <property name="javac.target" value="17"/>
     <!--
 
     There exist several targets which are by default empty and which can be 
