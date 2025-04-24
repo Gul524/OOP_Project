@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
 import raven.application.Application;
 import raven.application.form.other.*;
+import raven.application.form.other.bills.Bills;
 import raven.menu.Menu;
 import raven.menu.MenuAction;
 

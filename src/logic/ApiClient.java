@@ -4,6 +4,7 @@
  */
 package logic;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -17,6 +18,8 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -72,17 +75,27 @@ public class ApiClient {
     }
 
 
-     static List<Product> loadProducts() {
+    public static Map<Integer, Product> loadProducts() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/products");
-//           request.addHeader("Authorization", "Bearer " + bearerToken);
             CloseableHttpResponse response = _httpClient.execute(request);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode >= 200 && statusCode <= 300) {
                 String jsonResponse = EntityUtils.toString(response.getEntity());
-                ApiResponseModel<List<Product>> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                // Use TypeReference to deserialize the response correctly
+                ApiResponseModel<List<Product>> responseModel = _mapper.readValue(
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Product>>>() {}
+                );
                 if (responseModel.isSuccess()) {
-                    return responseModel.getData();
+                    // Convert List<Product> to Map<Integer, Product> using productId as the key
+                    return responseModel.getData().stream()
+                            .collect(Collectors.toMap(Product::getId, product -> product));
+                } else if (responseModel.getErrorCause() != null) {
+                    System.out.println("Error: " + responseModel.getErrorCause());
+                    return null;
+                } else if (responseModel.getMessage() != null) {
+                    System.out.println("Error: " + responseModel.getMessage());
+                    return null;
                 } else {
                     System.out.println(responseModel.getErrorCause());
                     return null;
@@ -136,32 +149,15 @@ public class ApiClient {
     public static void main(String[] args) {
         checkApi();
         login();
-        System.out.println(_token);
-        System.out.println(loadProducts());
-        ArrayList<Size> sizes =  new ArrayList<>();
-        sizes.add(new Size(0,"1 ltr",0 , 120 , null));
-        sizes.add( new Size(0 , "1.5 ltr" , 0 , 200 , null));
-        ArrayList<Flavour> flavours =  new ArrayList<>();
-        flavours.add(new Flavour(0,0,"coke" , 0 , 0));
-        flavours.add( new Flavour(0 , 0 , "lemon" , 0 , 0));
-        ArrayList<Product> products = new ArrayList<>();
-
-        products.add( new Product(
-                0,new Category(1 ,"Drinks", true),
-                "ColdDrinks",
-                120,
-                140,
-                8,false,
-                false,
-                true ,
-                sizes,
-                flavours,
-                new ArrayList<Deal>()
-        ));
-//        storeProduct(
-//                products
-//        );
-        System.out.println(loadProducts());
-
+        var productMap = loadProducts();
+        if (productMap != null) {
+            System.out.println("Token: " + _token);
+            Product firstProduct = productMap.get(1); // Access product with ID 1
+            if (firstProduct != null) {
+                System.out.println("Product Name: " + firstProduct.getProductName());
+            } else {
+                System.out.println("Product with ID 1 not found.");
+            }
+        }
     }
 }
