@@ -6,6 +6,7 @@ package logic;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import data.ProductData;
 import models.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,6 +18,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,14 +33,13 @@ public class ApiClient {
     static String _baseURL = "http://localhost:8080";
     static String _token;
 
-    public static void checkApi(){
-        HttpGet request = new HttpGet(_baseURL+"/connection/check");
+    public static void checkApi() {
+        HttpGet request = new HttpGet(_baseURL + "/connection/check");
         try {
             CloseableHttpResponse response = _httpClient.execute(request);
-            if(response.getStatusLine().getStatusCode() == 200){
+            if (response.getStatusLine().getStatusCode() == 200) {
                 System.out.println(EntityUtils.toString(response.getEntity()));
-            }
-            else {
+            } else {
                 System.out.println(EntityUtils.toString(response.getEntity()));
             }
         } catch (IOException e) {
@@ -47,8 +48,8 @@ public class ApiClient {
     }
 
 
-    static public void login()  {
-        try{
+    static public void login() {
+        try {
             String jsonBody = "{\"username\":\"api\" , \"password\":\"123\"}";
             HttpPost request = new HttpPost(_baseURL + "/login");
             request.addHeader("Content-Type", "application/json");
@@ -58,20 +59,40 @@ public class ApiClient {
 
             int statusCode = response.getStatusLine().getStatusCode();
 
-            if(statusCode == 200){
+            if (statusCode == 200) {
                 _token = EntityUtils.toString(response.getEntity());
-            }
-            else if(statusCode == 401){
+            } else if (statusCode == 401) {
                 String responseData = EntityUtils.toString(response.getEntity());
                 System.out.println(responseData);
-            }
-            else {
+            } else {
                 System.out.println("Failed to Login");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public static void mapProductsToCategories(List<Product> products) {
+        // Clear existing data
+        ProductData.stringCategories.clear();
+        ProductData.categorizedProducts.clear();
+
+        // Group products by category name and populate stringCategories
+        for (Product product : products) {
+            // Use categoryName from product.category if available, else fallback to categoryId as string
+            String categoryName = (product.category != null && product.category.categoryName != null)
+                    ? product.category.categoryName
+                    : "Category_" + product.categoryId;
+
+            // Add category name to stringCategories if not already present
+            if (!ProductData.stringCategories.contains(categoryName)) {
+                ProductData.stringCategories.add(categoryName);
+            }
+
+            // Add product to categorizedProducts under the category name
+            ProductData.categorizedProducts.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(product);
+        }
     }
 
 
@@ -84,12 +105,18 @@ public class ApiClient {
                 String jsonResponse = EntityUtils.toString(response.getEntity());
                 // Use TypeReference to deserialize the response correctly
                 ApiResponseModel<List<Product>> responseModel = _mapper.readValue(
-                        jsonResponse, new TypeReference<ApiResponseModel<List<Product>>>() {}
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Product>>>() {
+                        }
                 );
                 if (responseModel.isSuccess()) {
                     // Convert List<Product> to Map<Integer, Product> using productId as the key
+
+                    mapProductsToCategories(responseModel.getData());
+
                     return responseModel.getData().stream()
                             .collect(Collectors.toMap(Product::getId, product -> product));
+
+
 
                 } else if (responseModel.getErrorCause() != null) {
                     System.out.println("Error: " + responseModel.getErrorCause());
@@ -156,13 +183,15 @@ public class ApiClient {
                 String jsonResponse = EntityUtils.toString(response.getEntity());
                 // Use TypeReference to deserialize the response correctly
                 ApiResponseModel<List<Category>> responseModel = _mapper.readValue(
-                        jsonResponse, new TypeReference<ApiResponseModel<List<Category>>>() {}
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Category>>>() {
+                        }
                 );
                 if (responseModel.isSuccess()) {
                     // Convert List<Product> to Map<Integer, Product> using productId as the key
-                    return responseModel.getData();
-//                            stream()
-//                            .collect(Collectors.toMap(Product::getId, product -> product));
+                    for(Category c : (responseModel.getData())){
+                        ProductData.stringCategories.add(c.categoryName);
+
+                    }return responseModel.getData();
 
                 } else if (responseModel.getErrorCause() != null) {
                     System.out.println("Error: " + responseModel.getErrorCause());
@@ -181,12 +210,13 @@ public class ApiClient {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
 
-    static String storeCategory(List<Category> categories) {
+    public static String storeCategory(List<Category> categories) {
         try {
-            var request = new HttpPost(_baseURL + "/resApi/products/addProducts");
+            var request = new HttpPost(_baseURL + "/resApi/products/addCategory");
             request.addHeader("Content-Type", "application/json");
 //           request.addHeader("Authorization", "Bearer " + bearerToken);
             String jsonBody;
@@ -222,6 +252,7 @@ public class ApiClient {
 
 
 
+
     public static void main(String[] args) {
 //        checkApi();
 //        login();
@@ -241,11 +272,16 @@ public class ApiClient {
 //        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
 //
 //      storeProduct(products);
-        List<Category> c = new ArrayList<>();
-        c.add(new Category("Fast Food "));
-        c.add(new Category("Tandoori "));c.add(new Category(" Sweats"));
-        storeCategory(c);
+//        List<Category> c = new ArrayList<>();
+//        c.add(new Category("Fast Food "));
+//        c.add(new Category("Tandoori "));
+//        c.add(new Category(" Sweats"));
+//        storeCategory(c);
 
-        loadCategories();
+        loadProducts();
+
+        System.out.println(ProductData.stringCategories);
+        System.out.println(ProductData.categorizedProducts);
+
     }
 }
