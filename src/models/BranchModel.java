@@ -4,10 +4,13 @@
  */
 package models;
 
+import lombok.Data;
+
 /**
  *
  * @author AnasJ
  */
+@Data
 public class BranchModel {
     private Integer id;
     private Integer companyId;

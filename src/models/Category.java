@@ -17,4 +17,10 @@ public class Category {
     @JsonProperty(access = WRITE_ONLY)
     public int id;
     public String categoryName;
+
+    Category(String name){
+
+
+    }
+
 }
