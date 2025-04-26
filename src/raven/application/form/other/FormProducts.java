@@ -1,6 +1,7 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -27,17 +28,17 @@ public class FormProducts extends javax.swing.JPanel {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "ID", "Name", "Primary Price", "Secondary Price", "Discount %", "Deal Product", "Deal Item", "Fixed Deal", "Active"
+                "ID", "Name", "Flavor", "Size", "Price"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -45,12 +46,6 @@ public class FormProducts extends javax.swing.JPanel {
             }
         });
         jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(5).setResizable(false);
-            jTable1.getColumnModel().getColumn(6).setResizable(false);
-            jTable1.getColumnModel().getColumn(7).setResizable(false);
-            jTable1.getColumnModel().getColumn(8).setResizable(false);
-        }
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lb.setText("Products");
@@ -103,6 +98,30 @@ public class FormProducts extends javax.swing.JPanel {
 
     private void addItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addItemActionPerformed
         // TODO add your handling code here:
+        // Get user input
+        
+        String catID = JOptionPane.showInputDialog(this, "Enter Category ID:");
+        if (catID == null || catID.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Category ID cannot be empty.");
+            return;
+        }
+        
+        String catName = JOptionPane.showInputDialog(this, "Enter Category Name:");
+        if (catName == null || catName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Category Name cannot be empty.");
+            return;
+        }
+
+        String[] roles = {"Admin", "User"}; // Modify roles as per your system
+        String role = (String) JOptionPane.showInputDialog(this, "Select role:",
+                "Role Selection", JOptionPane.QUESTION_MESSAGE, null, roles, roles[0]);
+
+        if (role == null) {
+            JOptionPane.showMessageDialog(this, "Role selection is required.");
+            return;
+        }
+
+        // Call UserService to add user
     }//GEN-LAST:event_addItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
