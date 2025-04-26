@@ -12,7 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Size {
-    @JsonIgnore
+    @JsonProperty(access = WRITE_ONLY)
     public int id;
     public String name;
     public int price;

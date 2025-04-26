@@ -146,6 +146,44 @@ public class ApiClient {
     }
 
 
+    static String storeCategory(List<Category> categories) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/addProducts");
+            request.addHeader("Content-Type", "application/json");
+//           request.addHeader("Authorization", "Bearer " + bearerToken);
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(categories);
+            } catch (Exception e) {
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return "Error serializing JSON: " + e.getMessage();
+            }
+            request.setEntity(new StringEntity(jsonBody));
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Save Categories");
+                return "Failed to Save Categories";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
     public static void main(String[] args) {
         checkApi();
         login();
