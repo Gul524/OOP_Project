@@ -90,6 +90,7 @@ public class ApiClient {
                     // Convert List<Product> to Map<Integer, Product> using productId as the key
                     return responseModel.getData().stream()
                             .collect(Collectors.toMap(Product::getId, product -> product));
+
                 } else if (responseModel.getErrorCause() != null) {
                     System.out.println("Error: " + responseModel.getErrorCause());
                     return null;
@@ -146,6 +147,43 @@ public class ApiClient {
     }
 
 
+    public static List<Category> loadCategories() {
+        try {
+            var request = new HttpGet(_baseURL + "/resApi/products/categories");
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                // Use TypeReference to deserialize the response correctly
+                ApiResponseModel<List<Category>> responseModel = _mapper.readValue(
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Category>>>() {}
+                );
+                if (responseModel.isSuccess()) {
+                    // Convert List<Product> to Map<Integer, Product> using productId as the key
+                    return responseModel.getData();
+//                            stream()
+//                            .collect(Collectors.toMap(Product::getId, product -> product));
+
+                } else if (responseModel.getErrorCause() != null) {
+                    System.out.println("Error: " + responseModel.getErrorCause());
+                    return null;
+                } else if (responseModel.getMessage() != null) {
+                    System.out.println("Error: " + responseModel.getMessage());
+                    return null;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return null;
+                }
+            } else {
+                System.out.println("Failed to Load Product");
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     static String storeCategory(List<Category> categories) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/addProducts");
@@ -185,23 +223,29 @@ public class ApiClient {
 
 
     public static void main(String[] args) {
-        checkApi();
-        login();
-        var productMap = loadProducts();
-        if (productMap != null) {
-            System.out.println("Token: " + _token);
-            Product firstProduct = productMap.get(1); // Access product with ID 1
-            if (firstProduct != null) {
-                System.out.println("Product Name: " + firstProduct.getProductName());
-            } else {
-                System.out.println("Product with ID 1 not found.");
-            }
-        }
+//        checkApi();
+//        login();
+//        var productMap = loadProducts();
+//        if (productMap != null) {
+//            System.out.println("Token: " + _token);
+//            Product firstProduct = productMap.get(1); // Access product with ID 1
+//            if (firstProduct != null) {
+//                System.out.println("Product Name: " + firstProduct.getProductName());
+//            } else {
+//                System.out.println("Product with ID 1 not found.");
+//            }
+//        }
+//
+//      List<Product> products = new ArrayList<>();
+//
+//        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
+//
+//      storeProduct(products);
+        List<Category> c = new ArrayList<>();
+        c.add(new Category("Fast Food "));
+        c.add(new Category("Tandoori "));c.add(new Category(" Sweats"));
+        storeCategory(c);
 
-      List<Product> products = new ArrayList<>();
-
-        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
-
-      storeProduct(products);
+        loadCategories();
     }
 }

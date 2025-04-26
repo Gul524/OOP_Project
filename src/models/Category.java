@@ -18,8 +18,8 @@ public class Category {
     public int id;
     public String categoryName;
 
-    Category(String name){
-
+    public Category(String name){
+        this.categoryName = name;
 
     }
 
