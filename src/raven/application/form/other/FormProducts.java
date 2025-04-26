@@ -1,12 +1,19 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import javax.swing.JOptionPane;
+import models.Product;
+import java.util.ArrayList;
+import models.Flavor;
+import models.Size;
 
 /**
  *
  * @author Raven
  */
 public class FormProducts extends javax.swing.JPanel {
+
+    private ArrayList<Product> products = new ArrayList<>();
 
     public FormProducts() {
         initComponents();
@@ -27,17 +34,17 @@ public class FormProducts extends javax.swing.JPanel {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "ID", "Name", "Primary Price", "Secondary Price", "Discount %", "Deal Product", "Deal Item", "Fixed Deal", "Active"
+                "ID", "Name", "Flavor", "Size", "Price"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -45,12 +52,6 @@ public class FormProducts extends javax.swing.JPanel {
             }
         });
         jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(5).setResizable(false);
-            jTable1.getColumnModel().getColumn(6).setResizable(false);
-            jTable1.getColumnModel().getColumn(7).setResizable(false);
-            jTable1.getColumnModel().getColumn(8).setResizable(false);
-        }
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lb.setText("Products");
@@ -102,7 +103,48 @@ public class FormProducts extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addItemActionPerformed
-        // TODO add your handling code here:
+
+        try {
+            // Get product ID
+            String idStr = JOptionPane.showInputDialog(this, "Enter Product ID:");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Product ID cannot be empty.");
+                return;
+            }
+            int id = Integer.parseInt(idStr.trim());
+
+            // Get product name
+            String name = JOptionPane.showInputDialog(this, "Enter Product Name:");
+            if (name == null || name.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Product Name cannot be empty.");
+                return;
+            }
+
+            // Get product price
+            String priceStr = JOptionPane.showInputDialog(this, "Enter Product Price:");
+            if (priceStr == null || priceStr.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Product Price cannot be empty.");
+                return;
+            }
+            int price = Integer.parseInt(priceStr.trim());
+
+            // Normally, you'd ask for Size and Flavor, but let's keep them empty for now
+            ArrayList<Size> sizes = new ArrayList<>();
+            ArrayList<Flavor> flavors = new ArrayList<>();
+
+            // Create Product and add to products list
+            Product product = new Product(id, name, price, sizes, flavors);
+            products.add(product);
+
+            JOptionPane.showMessageDialog(this, "Product added successfully!");
+
+            // OPTIONAL: Update JTable here to show the new product
+            // (you can implement it if you want)
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid number format: " + ex.getMessage());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
+        }
     }//GEN-LAST:event_addItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

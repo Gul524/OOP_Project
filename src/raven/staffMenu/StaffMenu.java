@@ -18,9 +18,7 @@ import java.util.List;
 public class StaffMenu extends JPanel {
 
     private final String menuItems[][] = {
-        {"Menu"},
-        {"Reports"},
-        {"Order/Table", "Take Order", "Reserve Table"},
+        {"Take Order"},
         {"Logout"}
     };
 

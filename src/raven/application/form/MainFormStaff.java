@@ -4,7 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
 import raven.application.Application;
-//import raven.application.form.other.bills.Bills;
+import raven.application.form.other.Bills;
 import raven.application.form.other.FormMenu;
 import raven.application.form.other.FormReports;
 import raven.staffMenu.MenuAction;
@@ -65,12 +65,8 @@ public class MainFormStaff extends JLayeredPane {
             // Application.mainForm.showForm(new DefaultForm("Form : " + index + " " + subIndex));
             switch (index) {
                 case 0 ->
-                    Application.showFormStaff(new FormMenu());
+                    Application.showFormStaff(new Bills());
                 case 1 ->
-                    Application.showFormStaff(new FormReports());
-//                case 2 ->
-//                    Application.showFormStaff(new Bills());
-                case 3 ->
                     Application.logout();
                 default ->
                     action.cancel();
