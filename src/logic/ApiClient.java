@@ -111,7 +111,7 @@ public class ApiClient {
 
     static String storeProduct(List<Product> products) {
         try {
-            var request = new HttpPost(_baseURL + "/resApi/products/addProduct");
+            var request = new HttpPost(_baseURL + "/resApi/products/addProducts");
             request.addHeader("Content-Type", "application/json");
 //           request.addHeader("Authorization", "Bearer " + bearerToken);
             String jsonBody;
@@ -159,5 +159,11 @@ public class ApiClient {
                 System.out.println("Product with ID 1 not found.");
             }
         }
+
+      List<Product> products = new ArrayList<>();
+
+        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
+
+      storeProduct(products);
     }
 }

@@ -16,6 +16,6 @@ public class DealItem {
     public int dealId;
     public String itemName;
     public double price;
-    public List<Flavour> flavours;
+    public List<Flavor> flavours;
     public List<Size> size;
 }

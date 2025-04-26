@@ -14,6 +14,7 @@ import java.awt.print.PrinterJob;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
+import models.*;
 
 /**
  *
@@ -57,6 +58,7 @@ public class Bills extends javax.swing.JPanel {
             }
             return comboBox;
         }
+
 
         private Product findProductById(String id) {
             for (List<Product> products : categoryProductsMap.values()) {
@@ -112,7 +114,7 @@ public class Bills extends javax.swing.JPanel {
     private void initializeData() {
         categoryProductsMap = new HashMap<>();
 
-        // Pizzas
+//         Pizzas
         List<Product> pizzas = new ArrayList<>();
         List<String> pizzaSizes = Arrays.asList("Small", "Medium", "Large");
         List<String> pizzaFlavors = Arrays.asList("Pepperoni", "Fajita", "Vegetarian");
@@ -142,7 +144,7 @@ public class Bills extends javax.swing.JPanel {
         burgerPrices.put("Large", 450);
         burgers.add(new Product("B001", "Burger", burgerPrices, burgerSizes, burgerFlavors));
 
-        // Validate that all sizes have prices
+//         Validate that all sizes have prices
         for (List<Product> products : new ArrayList<>(Arrays.asList(pizzas, drinks, burgers))) {
             for (Product product : products) {
                 for (String size : product.sizes) {
@@ -158,6 +160,8 @@ public class Bills extends javax.swing.JPanel {
         categoryProductsMap.put("Burgers", burgers);
 
         Categories.setModel(new DefaultComboBoxModel<>(new String[]{"All", "Pizzas", "Drinks", "Burgers"}));
+        Categories.setModel(new DefaultComboBoxModel<>());
+
     }
 
     private void setupProductsTable() {
