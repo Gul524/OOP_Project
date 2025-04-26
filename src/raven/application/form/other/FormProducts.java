@@ -2,12 +2,18 @@ package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JOptionPane;
+import models.Product;
+import java.util.ArrayList;
+import models.Flavor;
+import models.Size;
 
 /**
  *
  * @author Raven
  */
 public class FormProducts extends javax.swing.JPanel {
+
+    private ArrayList<Product> products = new ArrayList<>();
 
     public FormProducts() {
         initComponents();
@@ -97,31 +103,48 @@ public class FormProducts extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addItemActionPerformed
-        // TODO add your handling code here:
-        // Get user input
-        
-        String catID = JOptionPane.showInputDialog(this, "Enter Category ID:");
-        if (catID == null || catID.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Category ID cannot be empty.");
-            return;
-        }
-        
-        String catName = JOptionPane.showInputDialog(this, "Enter Category Name:");
-        if (catName == null || catName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Category Name cannot be empty.");
-            return;
-        }
 
-        String[] roles = {"Admin", "User"}; // Modify roles as per your system
-        String role = (String) JOptionPane.showInputDialog(this, "Select role:",
-                "Role Selection", JOptionPane.QUESTION_MESSAGE, null, roles, roles[0]);
+        try {
+            // Get product ID
+            String idStr = JOptionPane.showInputDialog(this, "Enter Product ID:");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Product ID cannot be empty.");
+                return;
+            }
+            int id = Integer.parseInt(idStr.trim());
 
-        if (role == null) {
-            JOptionPane.showMessageDialog(this, "Role selection is required.");
-            return;
+            // Get product name
+            String name = JOptionPane.showInputDialog(this, "Enter Product Name:");
+            if (name == null || name.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Product Name cannot be empty.");
+                return;
+            }
+
+            // Get product price
+            String priceStr = JOptionPane.showInputDialog(this, "Enter Product Price:");
+            if (priceStr == null || priceStr.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Product Price cannot be empty.");
+                return;
+            }
+            int price = Integer.parseInt(priceStr.trim());
+
+            // Normally, you'd ask for Size and Flavor, but let's keep them empty for now
+            ArrayList<Size> sizes = new ArrayList<>();
+            ArrayList<Flavor> flavors = new ArrayList<>();
+
+            // Create Product and add to products list
+            Product product = new Product(id, name, price, sizes, flavors);
+            products.add(product);
+
+            JOptionPane.showMessageDialog(this, "Product added successfully!");
+
+            // OPTIONAL: Update JTable here to show the new product
+            // (you can implement it if you want)
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid number format: " + ex.getMessage());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
         }
-
-        // Call UserService to add user
     }//GEN-LAST:event_addItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

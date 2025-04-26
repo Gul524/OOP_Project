@@ -8,9 +8,7 @@ import java.util.Map;
 import models.*;
 
 public class ProductData {
-    public List<String> stringCategories;
-    public Map<String, List<Product>> categorizedProducts;
-    public Map<String, List<Product>> categoryProductsMap;
-
-
+    public static List<String> stringCategories;
+    public static Map<String, List<Product>> categorizedProducts;
+    public static Map<String, List<Product>> categoryProductsMap;
 }

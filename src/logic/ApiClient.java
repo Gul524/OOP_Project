@@ -30,6 +30,7 @@ public class ApiClient {
     static CloseableHttpClient _httpClient = HttpClients.createDefault();
     static String _baseURL = "http://localhost:8080";
     static String _token;
+   
 
     public static void checkApi(){
         HttpGet request = new HttpGet(_baseURL+"/connection/check");
@@ -184,9 +185,9 @@ public class ApiClient {
     }
 
 
-    static String storeCategory(List<Category> categories) {
+    public static String storeCategory(List<Category> categories) {
         try {
-            var request = new HttpPost(_baseURL + "/resApi/products/addProducts");
+            var request = new HttpPost(_baseURL + "/resApi/products/addCategory");
             request.addHeader("Content-Type", "application/json");
 //           request.addHeader("Authorization", "Bearer " + bearerToken);
             String jsonBody;
@@ -241,11 +242,12 @@ public class ApiClient {
 //        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
 //
 //      storeProduct(products);
-        List<Category> c = new ArrayList<>();
-        c.add(new Category("Fast Food "));
-        c.add(new Category("Tandoori "));c.add(new Category(" Sweats"));
-        storeCategory(c);
+//        List<Category> c = new ArrayList<>();
+//        c.add(new Category("Fast Food "));
+//        c.add(new Category("Tandoori "));c.add(new Category(" Sweats"));
+//        storeCategory(c);
 
-        loadCategories();
+        System.out.println(loadCategories());
+//        loadCategories();
     }
 }
