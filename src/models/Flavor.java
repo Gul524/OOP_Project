@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Flavour {
+public class Flavor {
     public int id;
     public Integer productId;
     public String name;
-    public Integer dealItemId;
-    public double price;
 }
