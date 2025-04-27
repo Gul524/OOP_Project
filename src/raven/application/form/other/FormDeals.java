@@ -33,7 +33,7 @@ public class FormDeals extends javax.swing.JPanel {
                 {null, null, null}
             },
             new String [] {
-                "ID", "Name", "Secondary Price"
+                "ID", "Name", "Price"
             }
         ) {
             Class[] types = new Class [] {
