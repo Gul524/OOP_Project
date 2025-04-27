@@ -118,10 +118,11 @@ public class FormCategories extends javax.swing.JPanel {
         });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {},
-            new String [] {"Category ID", "Category Name"}
+                new Object[][]{},
+                new String[]{"Category ID", "Category Name"}
         ) {
-            Class[] types = new Class [] {java.lang.String.class, java.lang.String.class};
+            Class[] types = new Class[]{java.lang.String.class, java.lang.String.class};
+
             @Override
             public Class getColumnClass(int columnIndex) {
                 return types[columnIndex];
@@ -132,35 +133,35 @@ public class FormCategories extends javax.swing.JPanel {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lb, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 300, Short.MAX_VALUE)
-                        .addComponent(addItem, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(dltItem, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(editItem, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 300, Short.MAX_VALUE)))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(lb, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jScrollPane1)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addGap(0, 300, Short.MAX_VALUE)
+                                                .addComponent(addItem, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(dltItem, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(editItem, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 300, Short.MAX_VALUE)))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lb)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(addItem)
-                    .addComponent(dltItem)
-                    .addComponent(editItem))
-                .addContainerGap(38, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lb)
+                                .addGap(18, 18, 18)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(addItem)
+                                        .addComponent(dltItem)
+                                        .addComponent(editItem))
+                                .addContainerGap(38, Short.MAX_VALUE))
         );
     }// </editor-fold>                        
 
@@ -231,7 +232,8 @@ public class FormCategories extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Please select a category to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
+        Object idObj = tableModel.getValueAt(selectedRow, 0);
         String oldCatName = (String) tableModel.getValueAt(selectedRow, 1);
 
         String newCatName = JOptionPane.showInputDialog(this, "Enter new Category Name:", oldCatName);
@@ -241,15 +243,23 @@ public class FormCategories extends javax.swing.JPanel {
         }
 
         try {
-            List<Category> categoriesToSave = new ArrayList<>();
-            Category updatedCategory = new Category(newCatName);
-            categoriesToSave.add(updatedCategory);
+            // Send update request to backend
+            int catId;
+            if (idObj instanceof Integer) {
+                catId = (Integer) idObj;
+            } else if (idObj instanceof String) {
+                // If IDs are strings like "C001", "C002"
+                String idStr = ((String) idObj).replaceAll("[^\\d]", "");
+                catId = Integer.parseInt(idStr);
+            } else {
+                throw new IllegalArgumentException("Unknown ID format: " + idObj);
+            }
 
-            // Save to database
-            ApiClient.storeCategory(categoriesToSave);
+            ApiClient.updateCategory(catId, newCatName); // <-- call the proper method to update category
 
-            // Update table
+            // Update the table
             tableModel.setValueAt(newCatName, selectedRow, 1);
+
             JOptionPane.showMessageDialog(this, "Category updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -258,6 +268,7 @@ public class FormCategories extends javax.swing.JPanel {
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
+
     }
 
     // Variables declaration - do not modify                     

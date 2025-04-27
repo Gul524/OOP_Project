@@ -271,7 +271,35 @@ public class ApiClient {
             throw new RuntimeException(e);
         }
     }
+    
+    public static String updateCategory(Integer categoryId, String newName) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/updateCategory/" + categoryId + "/" + newName);
+            request.addHeader("Content-Type", "application/json");
+            // request.addHeader("Authorization", "Bearer " + bearerToken); // Uncomment if needed
 
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Update Category");
+                return "Failed to Update Category";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public static void main(String[] args) {
 //        checkApi();
 //        login();
