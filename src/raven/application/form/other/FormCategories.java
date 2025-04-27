@@ -76,10 +76,11 @@ public class FormCategories extends javax.swing.JPanel {
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                    "Error loading categories: " + e.getMessage(),
+                    "Error loading categories: Not connected to internet",
                     "Database Error",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+            e.getMessage();
         }
     }
 
@@ -94,7 +95,7 @@ public class FormCategories extends javax.swing.JPanel {
         editItem = new javax.swing.JButton();
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lb.setText("Item Categories");
+        lb.setText("Product Categories");
 
         addItem.setText("Add Category");
         addItem.addActionListener(new java.awt.event.ActionListener() {
@@ -188,10 +189,11 @@ public class FormCategories extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Category added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                    "Error adding category: " + e.getMessage(),
+                    "Error adding category: Not connected to internet",
                     "Database Error",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+            e.getMessage();
         }
     }
 
@@ -218,10 +220,11 @@ public class FormCategories extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "Category deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                        "Error deleting category: " + e.getMessage(),
+                        "Error deleting category: Not connected to internet",
                         "Database Error",
                         JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
+                e.getMessage();
             }
         }
     }
@@ -263,10 +266,11 @@ public class FormCategories extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Category updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                    "Error updating category: " + e.getMessage(),
+                    "Error updating category: Not connected to internet",
                     "Database Error",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+            e.getMessage();
         }
 
     }
