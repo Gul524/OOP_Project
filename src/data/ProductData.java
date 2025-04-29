@@ -1,4 +1,4 @@
-package data;
+    package data;
 
 //import raven.application.form.other.bills.Bills;
 
@@ -12,7 +12,5 @@ import models.*;
 public class ProductData {
     public static List<String> stringCategories = new ArrayList<>();
     public static Map<String, List<Product>> categorizedProducts = new HashMap<>();
-
-
 
 }
