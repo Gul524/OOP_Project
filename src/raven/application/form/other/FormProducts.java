@@ -2,8 +2,12 @@ package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JOptionPane;
+
+import logic.ApiClient;
 import models.Product;
 import java.util.ArrayList;
+import java.util.List;
+
 import models.Flavor;
 import models.Size;
 
@@ -13,12 +17,18 @@ import models.Size;
  */
 public class FormProducts extends javax.swing.JPanel {
 
-    private ArrayList<Product> products = new ArrayList<>();
+    private List<Product> products = new ArrayList<>();
 
     public FormProducts() {
+        loadProducts();
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
+
+    }
+
+    void loadProducts(){
+        products = ApiClient.loadProducts();
     }
 
     @SuppressWarnings("unchecked")

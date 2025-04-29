@@ -93,7 +93,7 @@ public class ApiClient {
         }
     }
 
-    public static Map<Integer, Product> loadProducts() {
+    public static List<Product> loadProducts() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/products");
             CloseableHttpResponse response = _httpClient.execute(request);
@@ -110,8 +110,7 @@ public class ApiClient {
 
                     mapProductsToCategories(responseModel.getData());
 
-                    return responseModel.getData().stream()
-                            .collect(Collectors.toMap(Product::getId, product -> product));
+                    return responseModel.getData();
 
                 } else if (responseModel.getErrorCause() != null) {
                     System.out.println("Error: " + responseModel.getErrorCause());
