@@ -180,6 +180,7 @@ public class ApiClient {
                 }
                 );
                 if (responseModel.isSuccess()) {
+                    ProductData.categories = responseModel.getData();
                     // Convert List<Product> to Map<Integer, Product> using productId as the key
                     for (Category c : (responseModel.getData())) {
                         ProductData.stringCategories.add(c.categoryName);

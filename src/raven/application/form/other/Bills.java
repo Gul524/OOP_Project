@@ -1,10 +1,6 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import data.ProductData;
-import logic.ApiClient;
-import models.Product;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -60,8 +56,8 @@ public class Bills extends javax.swing.JPanel {
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             JComboBox<String> comboBox = (JComboBox<String>) super.getTableCellEditorComponent(table, value, isSelected, row, column);
             Object valueAt = table.getValueAt(row, 0);
-            int productId =  (int) valueAt ;
-            Product product =  findProductById(productId) ;
+            String productId = (valueAt instanceof String) ? (String) valueAt : null;
+            Product product = productId != null ? findProductById(productId) : null;
             if (product != null) {
                 String[] options = (this.column == 3)
                         ? (product.sizes != null && !product.sizes.isEmpty() ? product.sizes.toArray(new String[0]) : new String[]{"N/A"})
@@ -73,12 +69,12 @@ public class Bills extends javax.swing.JPanel {
             return comboBox;
         }
 
-        private Product findProductById(int id) {
-            if (id == 0) return null;
+        private Product findProductById(String id) {
+            if (id == null) return null;
             for (List<Product> products : categoryProductsMap.values()) {
                 if (products != null) {
                     for (Product product : products) {
-                        if (product.getId() == id) {
+                        if (product.id.equals(id)) {
                             return product;
                         }
                     }
@@ -88,31 +84,31 @@ public class Bills extends javax.swing.JPanel {
         }
     }
 
-//    class Product {
-//        String id;
-//        String name;
-//        Map<String, Integer> sizePrices;
-//        List<String> sizes;
-//        List<String> flavors;
-//
-//        public Product(String id, String name, Map<String, Integer> sizePrices, List<String> sizes, List<String> flavors) {
-//            this.id = id;
-//            this.name = name;
-//            this.sizePrices = sizePrices;
-//            this.sizes = sizes;
-//            this.flavors = flavors;
-//        }
-//
-//        public int getPriceForSize(String size) {
-//            if (size == null || size.equals("N/A") || sizePrices == null || !sizePrices.containsKey(size)) {
-//                if (sizes != null && !sizes.isEmpty()) {
-//                    return sizePrices != null ? sizePrices.getOrDefault(sizes.get(0), 0) : 0;
-//                }
-//                throw new IllegalArgumentException("No valid price for size: " + size + " for product: " + name);
-//            }
-//            return sizePrices.get(size);
-//        }
-//    }
+    class Product {
+        String id;
+        String name;
+        Map<String, Integer> sizePrices;
+        List<String> sizes;
+        List<String> flavors;
+
+        public Product(String id, String name, Map<String, Integer> sizePrices, List<String> sizes, List<String> flavors) {
+            this.id = id;
+            this.name = name;
+            this.sizePrices = sizePrices;
+            this.sizes = sizes;
+            this.flavors = flavors;
+        }
+
+        public int getPriceForSize(String size) {
+            if (size == null || size.equals("N/A") || sizePrices == null || !sizePrices.containsKey(size)) {
+                if (sizes != null && !sizes.isEmpty()) {
+                    return sizePrices != null ? sizePrices.getOrDefault(sizes.get(0), 0) : 0;
+                }
+                throw new IllegalArgumentException("No valid price for size: " + size + " for product: " + name);
+            }
+            return sizePrices.get(size);
+        }
+    }
 
     class Deal {
         String name;
@@ -146,7 +142,7 @@ public class Bills extends javax.swing.JPanel {
         pizzaPrices.put("Small", 800);
         pizzaPrices.put("Medium", 1000);
         pizzaPrices.put("Large", 1200);
-//        pizzas.add(new Product("P001", "Pizza", pizzaPrices, pizzaSizes, pizzaFlavors));
+        pizzas.add(new Product("P001", "Pizza", pizzaPrices, pizzaSizes, pizzaFlavors));
 
         // Drinks
         List<Product> drinks = new ArrayList<>();
@@ -156,7 +152,7 @@ public class Bills extends javax.swing.JPanel {
         drinkPrices.put("300ML", 100);
         drinkPrices.put("500ML", 150);
         drinkPrices.put("1L", 200);
-//        drinks.add(new Product("D001", "Soft Drink", drinkPrices, drinkSizes, drinkFlavors));
+        drinks.add(new Product("D001", "Soft Drink", drinkPrices, drinkSizes, drinkFlavors));
 
         // Burgers
         List<Product> burgers = new ArrayList<>();
@@ -166,7 +162,7 @@ public class Bills extends javax.swing.JPanel {
         burgerPrices.put("Small", 250);
         burgerPrices.put("Medium", 350);
         burgerPrices.put("Large", 450);
-//        burgers.add(new Product("B001", "Burger", burgerPrices, burgerSizes, burgerFlavors));
+        burgers.add(new Product("B001", "Burger", burgerPrices, burgerSizes, burgerFlavors));
 
         // Deals
         List<Deal> deals = new ArrayList<>();
@@ -175,23 +171,20 @@ public class Bills extends javax.swing.JPanel {
         deals.add(new Deal("Pizza Party", "3 Medium Pizzas + 2 300ML Drinks", 3200));
 
         // Validate that all sizes have prices
-//        for (List<Product> products : new ArrayList<>(Arrays.asList(pizzas, drinks, burgers))) {
-//            for (Product product : products) {
-//                for (String size : product.sizes) {
-//                    if (!product.sizePrices.containsKey(size)) {
-//                        throw new IllegalStateException("Missing price for size " + size + " in product " + product.name);
-//                    }
-//                }
-//            }
-//        }
+        for (List<Product> products : new ArrayList<>(Arrays.asList(pizzas, drinks, burgers))) {
+            for (Product product : products) {
+                for (String size : product.sizes) {
+                    if (!product.sizePrices.containsKey(size)) {
+                        throw new IllegalStateException("Missing price for size " + size + " in product " + product.name);
+                    }
+                }
+            }
+        }
 
-        ApiClient.loadProducts();
-        categoryProductsMap = ProductData.categorizedProducts;
-
-//        categoryProductsMap.put("Pizzas", pizzas);
-//        categoryProductsMap.put("Drinks", drinks);
-//        categoryProductsMap.put("Burgers", burgers);
-//        categoryDealsMap.put("Deals", deals);
+        categoryProductsMap.put("Pizzas", pizzas);
+        categoryProductsMap.put("Drinks", drinks);
+        categoryProductsMap.put("Burgers", burgers);
+        categoryDealsMap.put("Deals", deals);
 
         Categories.setModel(new DefaultComboBoxModel<>(new String[]{"All", "Pizzas", "Drinks", "Burgers", "Deals"}));
     }
@@ -216,13 +209,13 @@ public class Bills extends javax.swing.JPanel {
         // Populate table with products from all categories
         for (List<Product> products : categoryProductsMap.values()) {
             for (Product product : products) {
-                String defaultSize = product.getSizes() != null && !product.getSizes().isEmpty() ? product.getSizes().get(0).name : "N/A";
+                String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                 productsTableModel.addRow(new Object[]{
                         product.id,
-                        product.getProductName(),
+                        product.name,
                         product.getPriceForSize(defaultSize),
                         defaultSize,
-                        product.getFlavors() != null && !product.getFlavors().isEmpty() ? product.getFlavors().get(0).name : "N/A"
+                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                 });
             }
         }
@@ -231,7 +224,7 @@ public class Bills extends javax.swing.JPanel {
         productsTableModel.addTableModelListener(e -> {
             if (!isDealsCategorySelected && e.getColumn() == 3) { // Size column changed
                 int row = e.getFirstRow();
-                int productId = (int) jTable1.getValueAt(row, 0);
+                String productId = (String) jTable1.getValueAt(row, 0);
                 String newSize = (String) jTable1.getValueAt(row, 3);
                 Product product = findProductById(productId);
                 if (product != null && newSize != null && !newSize.equals("N/A")) {
@@ -244,7 +237,7 @@ public class Bills extends javax.swing.JPanel {
                                 "Price Error",
                                 JOptionPane.WARNING_MESSAGE);
                         productsTableModel.setValueAt(product.sizes.get(0), row, 3); // Revert to default size
-                        productsTableModel.setValueAt(product.getPriceForSize(product.getSizes().get(0).name), row, 2);
+                        productsTableModel.setValueAt(product.getPriceForSize(product.sizes.get(0)), row, 2);
                     }
                 }
             }
@@ -252,12 +245,12 @@ public class Bills extends javax.swing.JPanel {
     }
 
     // Helper method to find product by ID
-    private Product findProductById(int id) {
-        if (id == 0) return null;
+    private Product findProductById(String id) {
+        if (id == null) return null;
         for (List<Product> products : categoryProductsMap.values()) {
             if (products != null) {
                 for (Product product : products) {
-                    if ((product.getId()) == (id)) {
+                    if (product.id.equals(id)) {
                         return product;
                     }
                 }
@@ -378,17 +371,17 @@ public class Bills extends javax.swing.JPanel {
             }
 
             List<Product> filteredProducts = productsToShow.stream()
-                    .filter(product -> product.getProductName().toLowerCase().contains(searchText))
+                    .filter(product -> product.name.toLowerCase().contains(searchText))
                     .collect(Collectors.toList());
 
             for (Product product : filteredProducts) {
-                String defaultSize = product.getSizes() != null && !product.getSizes().isEmpty() ? product.getSizes().get(0).name : "N/A";
+                String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                 productsTableModel.addRow(new Object[]{
                         product.id,
-                        product.getProductName(),
+                        product.name,
                         product.getPriceForSize(defaultSize),
                         defaultSize,
-                        product.getFlavors() != null && !product.getFlavors().isEmpty() ? product.getFlavors().get(0).name : "N/A"
+                        product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                 });
             }
         }
@@ -578,13 +571,13 @@ public class Bills extends javax.swing.JPanel {
             if ("All".equals(selectedCategory)) {
                 for (List<Product> products : categoryProductsMap.values()) {
                     for (Product product : products) {
-                        String defaultSize = product.getSizes() != null && !product.getSizes().isEmpty() ? product.getSizes().get(0).name : "N/A";
+                        String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                         productsTableModel.addRow(new Object[]{
                                 product.id,
-                                product.getProductName(),
+                                product.name,
                                 product.getPriceForSize(defaultSize),
                                 defaultSize,
-                                product.getFlavors() != null && !product.getFlavors().isEmpty() ? product.getFlavors().get(0).name : "N/A"
+                                product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                         });
                     }
                 }
@@ -592,13 +585,13 @@ public class Bills extends javax.swing.JPanel {
                 List<Product> products = categoryProductsMap.get(selectedCategory);
                 if (products != null) {
                     for (Product product : products) {
-                        String defaultSize = product.getSizes() != null && !product.getSizes().isEmpty() ? product.getSizes().get(0).name : "N/A";
+                        String defaultSize = product.sizes != null && !product.sizes.isEmpty() ? product.sizes.get(0) : "N/A";
                         productsTableModel.addRow(new Object[]{
                                 product.id,
-                                product.getProductName(),
+                                product.name,
                                 product.getPriceForSize(defaultSize),
                                 defaultSize,
-                                product.getFlavors() != null && !product.getFlavors().isEmpty() ? product.getFlavors().get(0).name : "N/A"
+                                product.flavors != null && !product.flavors.isEmpty() ? product.flavors.get(0) : "N/A"
                         });
                     }
                 }
@@ -661,13 +654,13 @@ public class Bills extends javax.swing.JPanel {
                 Object sizeObj = jTable1.getValueAt(selectedRow, 3);
                 Object flavorObj = jTable1.getValueAt(selectedRow, 4);
 
-                int productId = (productIdObj instanceof Integer) ? (int) productIdObj : null;
+                String productId = (productIdObj instanceof String) ? (String) productIdObj : null;
                 String productName = (productNameObj instanceof String) ? (String) productNameObj : null;
                 Integer price = (priceObj instanceof Integer) ? (Integer) priceObj : null;
                 String size = (sizeObj instanceof String) ? (String) sizeObj : null;
                 String flavor = (flavorObj instanceof String) ? (String) flavorObj : null;
 
-                if ( productName == null || price == null) {
+                if (productId == null || productName == null || price == null) {
                     throw new IllegalStateException("Invalid product data selected");
                 }
 
