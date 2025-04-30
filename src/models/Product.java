@@ -36,4 +36,14 @@ public class Product {
 
     }
 
+    public int getPriceForSize(String size){
+        int price = 0;
+        for(Size s : sizes){
+            if(size.equals(s.name)){
+                price = s.price;
+            }
+        }
+        return price;
+    }
+
 }

@@ -6,7 +6,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
 import raven.application.Application;
 import raven.application.form.other.*;
-import raven.application.form.other.bills.Bills;
+import raven.application.form.other.Bills;
 import raven.menu.Menu;
 import raven.menu.MenuAction;
 
@@ -72,12 +72,14 @@ public class MainForm extends JLayeredPane {
                 if (subIndex == 2) {
                     Application.showForm(new FormProducts());
                     }
+                if (subIndex == 3) {
+                    Application.showForm(new FormDeals());
+                }
             }
             case 2 -> Application.showForm(new FormStaff());
             case 3 -> Application.showForm(new FormInventory());
-            case 4 -> Application.showForm(new FormReports());
-            case 5 -> Application.showForm(new Bills());
-            case 6 -> Application.logout();
+            case 4 -> Application.showForm(new Bills());
+            case 5 -> Application.logout();
             default -> action.cancel();
         }
     });
