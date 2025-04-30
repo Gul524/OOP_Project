@@ -2,15 +2,17 @@ package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JOptionPane;
-
 import logic.ApiClient;
 import models.Product;
 import java.util.ArrayList;
 import java.util.List;
 import models.Category;
 import data.ProductData;
+import java.awt.Component;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JList;
 import models.Flavor;
 import models.Size;
 
@@ -23,19 +25,30 @@ public class FormProducts extends javax.swing.JPanel {
     private List<Product> products = new ArrayList<>();
 
     public FormProducts() {
-        loadProducts();
         initComponents();
+        loadProducts();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
 
     }
 
     void loadProducts() {
-
-        products = ApiClient.loadProducts();
-        ApiClient.loadCategories();
-        categoriesList = new JComboBox<>(ProductData.categories.toArray(new Category[0]));
-    }
+    products = ApiClient.loadProducts();
+    ApiClient.loadCategories();
+    categoriesList.setModel(new DefaultComboBoxModel<>(ProductData.categories.toArray(new Category[0])));
+    
+    // Set a custom renderer for the JComboBox
+    categoriesList.setRenderer(new DefaultListCellRenderer() {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof Category) {
+                setText(((Category) value).getCategoryName()); // Display only categoryName
+            }
+            return this;
+        }
+    });
+}
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
