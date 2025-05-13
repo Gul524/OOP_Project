@@ -185,7 +185,7 @@ public class ApiClient {
                     for (Category c : (responseModel.getData())) {
                         ProductData.stringCategories.add(c.categoryName);
 
-                    }admin
+                    }
                     return responseModel.getData();
 
                 } else if (responseModel.getErrorCause() != null) {
