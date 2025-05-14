@@ -8,7 +8,10 @@ import models.Product;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.Font;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -212,11 +215,31 @@ public class Bills extends javax.swing.JPanel {
                 new Object[][]{},
                 new String[]{"ID", "Name", "Price", "Size", "Flavor"}
         ) {
+            Class<?>[] types = new Class<?>[]{
+                    Integer.class, String.class, Integer.class, String.class, String.class
+            };
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
             @Override
             public boolean isCellEditable(int row, int column) {
                 return column == 3 || column == 4; // Only Size and Flavor are editable
             }
         };
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int i = 0; i < jTable1.getColumnCount(); i++) {
+            jTable1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        JTableHeader header = jTable1.getTableHeader();
+        DefaultTableCellRenderer headerRenderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
+        headerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        header.setDefaultRenderer(headerRenderer);
 
         jTable1.setModel(productsTableModel);
 
@@ -229,7 +252,7 @@ public class Bills extends javax.swing.JPanel {
             for (Product product : products) {
                 String defaultSize = product.getSizes() != null && !product.getSizes().isEmpty() ? product.getSizes().get(0).name : "-";
                 productsTableModel.addRow(new Object[]{
-                        product.id,
+                        product.getId(),
                         product.getProductName(),
                         product.getPriceForSize(defaultSize),
                         defaultSize,
@@ -238,31 +261,50 @@ public class Bills extends javax.swing.JPanel {
             }
         }
 
-
         // Add table model listener to update price when size changes
-        productsTableModel.addTableModelListener(
-                e -> {
-            // Size column changed
-                int row = jTable1.getEditingRow();
-//                int column = e.getColumn();
-                int productId = (int) jTable1.getValueAt(row, 0);
-                String newSize = (String) jTable1.getValueAt(row, e.getColumn());
-                Product product = findProductById(productId);
-                if (product != null && newSize != null ) {
-                    int newPrice = product.getPriceForSize(newSize);
-                    if (newPrice > 0) {
-                        productsTableModel.setValueAt(newPrice, row, 3); // Update price column
-                    } else {
-                        JOptionPane.showMessageDialog(Bills.this,
-                                "Invalid price for size: " + newSize,
-                                "Price Error",
-                                JOptionPane.WARNING_MESSAGE);
-                        productsTableModel.setValueAt(product.sizes.get(0), row, 3); // Revert to default size
-                        productsTableModel.setValueAt(product.getPriceForSize(product.getSizes().get(0).name), row, 2);
-                    }
-                }
+        productsTableModel.addTableModelListener(e -> {
+            if (e.getType() != TableModelEvent.UPDATE) return;
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            if (row == -1 || (column != 3 && column != 4)) return;
+
+            int productId = (int) jTable1.getValueAt(row, 0);
+            Object value = jTable1.getValueAt(row, column);
+            System.out.println("TableModelListener: row=" + row + ", column=" + column + ", value=" + value + ", type=" + (value != null ? value.getClass().getName() : "null"));
+            String newSize = null;
+
+            if (value instanceof String) {
+                newSize = (String) value;
+            } else if (value instanceof Integer) {
+                ProductComboBoxEditor editor = (ProductComboBoxEditor) jTable1.getColumnModel().getColumn(column).getCellEditor();
+                JComboBox<String> comboBox = (JComboBox<String>) editor.getTableCellEditorComponent(jTable1, value, false, row, column);
+                newSize = comboBox.getItemAt((Integer) value);
+            } else if (value != null) {
+                newSize = value.toString();
             }
-       );
+
+            Product product = findProductById(productId);
+            if (product == null || newSize == null) {
+                System.out.println("Product or value is null for productId=" + productId);
+                return;
+            }
+            if(column == 3) {
+                int newPrice = product.getPriceForSize(newSize);
+                if (newPrice > 0) {
+                    productsTableModel.setValueAt(newPrice, row, 2); // Update price column
+                } else {
+                    JOptionPane.showMessageDialog(Bills.this,
+                            "Invalid price for size: " + newSize,
+                            "Price Error",
+                            JOptionPane.WARNING_MESSAGE);
+                    String defaultSize = product.getSizes().get(0).name;
+                    productsTableModel.setValueAt(defaultSize, row, column); // Revert to default size
+                    productsTableModel.setValueAt(product.getPriceForSize(defaultSize), row, 2); // Update price
+                }
+
+            }
+
+        });
     }
 
     // Helper method to find product by ID
