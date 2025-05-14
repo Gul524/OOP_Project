@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import logic.ApiClient;
 import raven.application.form.LoginForm;
 import raven.application.form.MainForm;
 import raven.application.form.MainFormStaff;
@@ -104,6 +105,8 @@ public class Application extends javax.swing.JFrame {
 
     public static void main(String args[]) {
         FlatRobotoFont.install();
+        ApiClient.loadCategories();
+        ApiClient.loadProducts();
         FlatLaf.registerCustomDefaultsSource("raven.theme");
         UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
         FlatMacDarkLaf.setup();
