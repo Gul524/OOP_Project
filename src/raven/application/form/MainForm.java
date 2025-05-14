@@ -1,4 +1,3 @@
-
 package raven.application.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
@@ -16,13 +15,29 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 /**
- *
  * @author Raven
  */
-
 public class MainForm extends JLayeredPane {
 
+    // Singleton instances of forms
+    private final FormDashboard formDashboard;
+    private final FormCategories formCategories;
+    private final FormProducts formProducts;
+    private final FormDeals formDeals;
+    private final FormStaff formStaff;
+    private final FormInventory formInventory;
+    private final Bills formBills;
+
     public MainForm() {
+        // Initialize singleton instances of forms
+        formDashboard = new FormDashboard(); // Adjust if FormDashboard has a singleton pattern
+        formCategories = new FormCategories(); // Adjust if FormCategories has a singleton pattern
+        formProducts = new FormProducts(); // Use the singleton instance
+        formDeals = new FormDeals(); // Adjust if FormDeals has a singleton pattern
+        formStaff = new FormStaff(); // Adjust if FormStaff has a singleton pattern
+        formInventory = new FormInventory(); // Adjust if FormInventory has a singleton pattern
+        formBills = new Bills(); // Adjust if Bills has a singleton pattern
+
         init();
     }
 
@@ -62,28 +77,28 @@ public class MainForm extends JLayeredPane {
     }
 
     private void initMenuEvent() {
-    menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
-        switch (index) {
-            case 0 -> Application.showForm(new FormDashboard());
-            case 1 -> {
-                if (subIndex == 1) {
-                    Application.showForm(new FormCategories());
-                }
-                if (subIndex == 2) {
-                    Application.showForm(new FormProducts());
+        menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
+            switch (index) {
+                case 0 -> Application.showForm(formDashboard);
+                case 1 -> {
+                    if (subIndex == 1) {
+                        Application.showForm(formCategories);
                     }
-                if (subIndex == 3) {
-                    Application.showForm(new FormDeals());
+                    if (subIndex == 2) {
+                        Application.showForm(formProducts);
+                    }
+                    if (subIndex == 3) {
+                        Application.showForm(formDeals);
+                    }
                 }
+                case 2 -> Application.showForm(formStaff);
+                case 3 -> Application.showForm(formInventory);
+                case 4 -> Application.showForm(formBills);
+                case 5 -> Application.logout();
+                default -> action.cancel();
             }
-            case 2 -> Application.showForm(new FormStaff());
-            case 3 -> Application.showForm(new FormInventory());
-            case 4 -> Application.showForm(new Bills());
-            case 5 -> Application.logout();
-            default -> action.cancel();
-        }
-    });
-}
+        });
+    }
 
     private void setMenuFull(boolean full) {
         String icon;
