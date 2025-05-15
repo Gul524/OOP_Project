@@ -46,4 +46,20 @@ public class Product {
         return price;
     }
 
+    public String getFalovorsString(){
+        StringBuilder result = new StringBuilder();
+        for(Flavor f : flavors){
+            result.append(f.getName()).append(" , ");
+        }
+        return (result.isEmpty())? "-" : result.toString();
+    }
+
+    public String getSizesString(){
+        StringBuilder result = new StringBuilder();
+        for(Size s : sizes){
+            result.append("(").append(s.name).append(" - ").append(s.price).append(") , ");
+        }
+        return (result.isEmpty())? "-" : result.toString();
+    }
+
 }

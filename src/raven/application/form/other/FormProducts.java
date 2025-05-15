@@ -1,18 +1,19 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import javax.swing.JOptionPane;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
 import logic.ApiClient;
 import models.Product;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import models.Category;
 import data.ProductData;
 import java.awt.Component;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JComboBox;
-import javax.swing.JList;
+
 import models.Flavor;
 import models.Size;
 
@@ -21,8 +22,28 @@ import models.Size;
  * @author Raven
  */
 public class FormProducts extends javax.swing.JPanel {
+    DefaultTableModel productTableModel = new DefaultTableModel( new Object [][] {
 
-    private List<Product> products = new ArrayList<>();
+    },
+            new String [] {
+                    "ID", "Name", "Size","Flavor"
+            }) {
+        Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
+        };
+        boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+        };
+
+        public Class getColumnClass(int columnIndex) {
+            return types [columnIndex];
+        }
+
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return canEdit [columnIndex];
+        }
+    } ;
+
 
     public FormProducts() {
         initComponents();
@@ -32,10 +53,30 @@ public class FormProducts extends javax.swing.JPanel {
 
     }
 
+
+
+    void showProducts(DefaultTableModel tableModel , String category ) {
+      for(Product p : ProductData.categorizedProducts.get(category)){
+          System.out.println(p.getSizesString());
+          tableModel.addRow(
+                  new Object[]{
+                          p.getId(),
+                          p.getProductName(),
+                          p.getSizesString(),
+                          p.getFalovorsString()
+
+                  }
+          );
+      }
+
+    }
+
+
+
     void loadProducts() {
-    products = ApiClient.loadProducts();
-    ApiClient.loadCategories();
     categoriesList.setModel(new DefaultComboBoxModel<>(ProductData.categories.toArray(new Category[0])));
+
+    showProducts(productTableModel , ProductData.stringCategories.get(0));
     
     // Set a custom renderer for the JComboBox
     categoriesList.setRenderer(new DefaultListCellRenderer() {
@@ -77,34 +118,12 @@ public class FormProducts extends javax.swing.JPanel {
         searchProduct = new javax.swing.JTextField();
 
         jTable1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "ID", "Name", "Flavor", "Size", "Price"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
+        jTable1.setModel(productTableModel);
         jTable1.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(jTable1);
         if (jTable1.getColumnModel().getColumnCount() > 0) {
             jTable1.getColumnModel().getColumn(0).setResizable(false);
-            jTable1.getColumnModel().getColumn(4).setResizable(false);
+//            jTable1.getColumnModel().getColumn(4).setResizable(false);
         }
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
