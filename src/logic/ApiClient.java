@@ -182,6 +182,7 @@ public class ApiClient {
                 if (responseModel.isSuccess()) {
                     ProductData.categories = responseModel.getData();
                     ProductData.stringCategories.clear();
+                    ProductData.stringCategories.add("All");
                     for (Category c : (responseModel.getData())) {
                         ProductData.stringCategories.add(c.categoryName);
 

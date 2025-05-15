@@ -10,7 +10,7 @@ import models.*;
 
 public class ProductData {
 
-    public static List<String> stringCategories = new ArrayList<>();
+    public static List<String> stringCategories = new ArrayList<>(){};
     public static Map<String, List<Product>> categorizedProducts = new HashMap<>();
     public static List<Category> categories = new ArrayList<>();
 }

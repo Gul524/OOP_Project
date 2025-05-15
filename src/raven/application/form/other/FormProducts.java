@@ -56,18 +56,41 @@ public class FormProducts extends javax.swing.JPanel {
 
 
     void showProducts(DefaultTableModel tableModel , String category ) {
-      for(Product p : ProductData.categorizedProducts.get(category)){
-          System.out.println(p.getSizesString());
-          tableModel.addRow(
-                  new Object[]{
-                          p.getId(),
-                          p.getProductName(),
-                          p.getSizesString(),
-                          p.getFalovorsString()
+        try {
 
-                  }
-          );
-      }
+            if ("All".equals(category)) {
+                for (List<Product> products : ProductData.categorizedProducts.values()) {
+                    for (Product p : products) {
+                        tableModel.addRow(new Object[]{
+                                p.getId(),
+                                p.getProductName(),
+                                p.getSizesString(),
+                                p.getFalovorsString()
+
+                        });
+                    }
+                }
+                return;
+            }
+            if(ProductData.categorizedProducts.get(category).isEmpty()){
+                return;
+            }
+            for(Product p : ProductData.categorizedProducts.get(category)){
+                tableModel.addRow(
+                        new Object[]{
+                                p.getId(),
+                                p.getProductName(),
+                                p.getSizesString(),
+                                p.getFalovorsString()
+
+                        }
+                );
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 
@@ -76,7 +99,7 @@ public class FormProducts extends javax.swing.JPanel {
     void loadProducts() {
     categoriesList.setModel(new DefaultComboBoxModel<>(ProductData.categories.toArray(new Category[0])));
 
-    showProducts(productTableModel , ProductData.stringCategories.get(0));
+    showProducts(productTableModel ,"All");
     
     // Set a custom renderer for the JComboBox
     categoriesList.setRenderer(new DefaultListCellRenderer() {
