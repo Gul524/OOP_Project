@@ -180,6 +180,7 @@ public class ApiClient {
                 }
                 );
                 if (responseModel.isSuccess()) {
+                    ProductData.categories.clear();
                     ProductData.categories = responseModel.getData();
                     ProductData.stringCategories.clear();
                     ProductData.stringCategories.add("All");
@@ -201,6 +202,45 @@ public class ApiClient {
                 }
             } else {
                 System.out.println("Failed to Load Product");
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static List<Staff> loadStaff() {
+        try {
+            var request = new HttpGet(_baseURL + "/resApi/employees");
+//            request.addHeader();
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                // Use TypeReference to deserialize the response correctly
+                ApiResponseModel<List<Staff>> responseModel = _mapper.readValue(
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Staff>>>() {
+                        }
+                );
+                if (responseModel.isSuccess()) {
+                    ProductData.employees.clear();
+                    ProductData.employees = responseModel.getData();
+
+                    return responseModel.getData();
+
+                } else if (responseModel.getErrorCause() != null) {
+                    System.out.println("Error: " + responseModel.getErrorCause());
+                    return null;
+                } else if (responseModel.getMessage() != null) {
+                    System.out.println("Error: " + responseModel.getMessage());
+                    return null;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return null;
+                }
+            } else {
+                System.out.println("Failed to Load Staff");
                 return null;
             }
         } catch (Exception e) {
@@ -239,6 +279,43 @@ public class ApiClient {
             } else {
                 System.out.println("Failed to Save Categories");
                 return "Failed to Save Categories";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public static String storeStaff( Staff staff) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/addEmployee");
+            request.addHeader("Content-Type", "application/json");
+//           request.addHeader("Authorization", "Bearer " + bearerToken);
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(staff);
+            } catch (Exception e) {
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return "Error serializing JSON: " + e.getMessage();
+            }
+            request.setEntity(new StringEntity(jsonBody));
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Save staff");
+                return "Failed to Save Staff";
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -1,6 +1,14 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import data.ProductData;
+import models.Staff;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -8,10 +16,55 @@ import com.formdev.flatlaf.FlatClientProperties;
  */
 public class FormStaff extends javax.swing.JPanel {
 
+    List<Staff> forSendStaff = new ArrayList<>();
+
+
     public FormStaff() {
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
+    }
+
+    DefaultTableModel staffTableModel = new DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                    "ID", "Name", "CNIC", "Role"
+            })
+    {
+        Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+        };
+        boolean[] canEdit = new boolean [] {
+                false, false, false, false
+        };
+
+        public Class getColumnClass(int columnIndex) {
+            return types [columnIndex];
+        }
+
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return canEdit [columnIndex];
+        }
+    };
+
+    void updateStaff(String s){
+        if(s.equals("")){
+            for(Staff e : ProductData.employees){
+                staffTableModel.addRow(
+                       new Object[] {
+                               e.getId(),
+                               e.getName(),
+                               e.getCnic(),
+                               e.getRoles()
+
+                }
+                );
+            }
+
+        }
+
     }
 
     @SuppressWarnings("unchecked")
@@ -42,29 +95,8 @@ public class FormStaff extends javax.swing.JPanel {
         staff.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         tblStaff.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        tblStaff.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "ID", "Name", "CNIC", "Role"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
+        tblStaff.setModel( staffTableModel);
+        updateStaff("");
         staff.setViewportView(tblStaff);
         if (tblStaff.getColumnModel().getColumnCount() > 0) {
             tblStaff.getColumnModel().getColumn(0).setResizable(false);
@@ -83,9 +115,20 @@ public class FormStaff extends javax.swing.JPanel {
 
         lblRole.setText("Role:");
 
-        roles.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        roles.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Manager","Waiter","Cashier","Cook" }));
 
         jButton1.setText("Add Staff");
+        jButton1.addActionListener( new java.awt.event.ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String _name = name.getName();
+                int _cnic = Integer.parseInt(cnic.getText());
+               Object v = roles.getSelectedObjects();
+                System.out.println(v);
+
+            }
+        });
 
         jButton2.setText("Delete Staff");
         jButton2.addActionListener(new java.awt.event.ActionListener() {

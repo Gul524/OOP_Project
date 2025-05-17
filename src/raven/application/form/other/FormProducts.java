@@ -19,7 +19,7 @@ import models.Size;
 
 /**
  *
- * @author Raven
+ * @author anas
  */
 public class FormProducts extends javax.swing.JPanel {
     DefaultTableModel productTableModel = new DefaultTableModel( new Object [][] {
@@ -142,6 +142,9 @@ public class FormProducts extends javax.swing.JPanel {
         searchProduct = new javax.swing.JTextField();
         lblCategory1 = new javax.swing.JLabel();
         categoriesList1 = new javax.swing.JComboBox<>();
+
+
+//        categoriesList1.actionPerformed();
 
         jTable1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jTable1.setModel(productTableModel);

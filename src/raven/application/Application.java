@@ -108,6 +108,7 @@ public class Application extends javax.swing.JFrame {
         try{
             ApiClient.loadCategories();
             ApiClient.loadProducts();
+            ApiClient.loadStaff();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
