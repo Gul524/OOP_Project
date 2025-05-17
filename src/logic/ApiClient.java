@@ -18,16 +18,15 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 
 /**
  * @author salman
  */
 public class ApiClient {
+
     static ObjectMapper _mapper = new ObjectMapper();
     static CloseableHttpClient _httpClient = HttpClients.createDefault();
     static String _baseURL = "http://localhost:8080";
@@ -46,7 +45,6 @@ public class ApiClient {
             throw new RuntimeException(e);
         }
     }
-
 
     static public void login() {
         try {
@@ -95,8 +93,7 @@ public class ApiClient {
         }
     }
 
-
-    public static Map<Integer, Product> loadProducts() {
+    public static List<Product> loadProducts() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/products");
             CloseableHttpResponse response = _httpClient.execute(request);
@@ -106,17 +103,14 @@ public class ApiClient {
                 // Use TypeReference to deserialize the response correctly
                 ApiResponseModel<List<Product>> responseModel = _mapper.readValue(
                         jsonResponse, new TypeReference<ApiResponseModel<List<Product>>>() {
-                        }
+                }
                 );
                 if (responseModel.isSuccess()) {
                     // Convert List<Product> to Map<Integer, Product> using productId as the key
 
                     mapProductsToCategories(responseModel.getData());
 
-                    return responseModel.getData().stream()
-                            .collect(Collectors.toMap(Product::getId, product -> product));
-
-
+                    return responseModel.getData();
 
                 } else if (responseModel.getErrorCause() != null) {
                     System.out.println("Error: " + responseModel.getErrorCause());
@@ -173,7 +167,6 @@ public class ApiClient {
         }
     }
 
-
     public static List<Category> loadCategories() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/categories");
@@ -184,14 +177,18 @@ public class ApiClient {
                 // Use TypeReference to deserialize the response correctly
                 ApiResponseModel<List<Category>> responseModel = _mapper.readValue(
                         jsonResponse, new TypeReference<ApiResponseModel<List<Category>>>() {
-                        }
+                }
                 );
                 if (responseModel.isSuccess()) {
-                    // Convert List<Product> to Map<Integer, Product> using productId as the key
-                    for(Category c : (responseModel.getData())){
+                    ProductData.categories.clear();
+                    ProductData.categories = responseModel.getData();
+                    ProductData.stringCategories.clear();
+                    ProductData.stringCategories.add("All");
+                    for (Category c : (responseModel.getData())) {
                         ProductData.stringCategories.add(c.categoryName);
 
-                    }return responseModel.getData();
+                    }
+                    return responseModel.getData();
 
                 } else if (responseModel.getErrorCause() != null) {
                     System.out.println("Error: " + responseModel.getErrorCause());
@@ -213,6 +210,44 @@ public class ApiClient {
 
     }
 
+    public static List<Staff> loadStaff() {
+        try {
+            var request = new HttpGet(_baseURL + "/resApi/employees");
+//            request.addHeader();
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                // Use TypeReference to deserialize the response correctly
+                ApiResponseModel<List<Staff>> responseModel = _mapper.readValue(
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Staff>>>() {
+                        }
+                );
+                if (responseModel.isSuccess()) {
+                    ProductData.employees.clear();
+                    ProductData.employees = responseModel.getData();
+
+                    return responseModel.getData();
+
+                } else if (responseModel.getErrorCause() != null) {
+                    System.out.println("Error: " + responseModel.getErrorCause());
+                    return null;
+                } else if (responseModel.getMessage() != null) {
+                    System.out.println("Error: " + responseModel.getMessage());
+                    return null;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return null;
+                }
+            } else {
+                System.out.println("Failed to Load Staff");
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
     public static String storeCategory(List<Category> categories) {
         try {
@@ -251,8 +286,102 @@ public class ApiClient {
     }
 
 
+    public static boolean storeStaff( List<Staff> staff) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/addEmployee");
+            request.addHeader("Content-Type", "application/json");
+//           request.addHeader("Authorization", "Bearer " + bearerToken);
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(staff);
+            } catch (Exception e) {
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return false;
+            }
+            request.setEntity(new StringEntity(jsonBody));
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
 
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    System.out.println(responseModel.getMessage());
+                    return true;
 
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    System.out.println(responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    return false;
+                }
+            } else {
+                System.out.println("Failed to Save staff");
+                return false;
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String deleteCategory(Integer categoryId) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/deleteCategory/" + categoryId);
+            request.addHeader("Content-Type", "application/json");
+            // request.addHeader("Authorization", "Bearer " + bearerToken); // Uncomment if needed
+
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Delete Category");
+                return "Failed to Delete Category";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static String updateCategory(Integer categoryId, String newName) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/updateCategory/" + categoryId + "/" + newName);
+            request.addHeader("Content-Type", "application/json");
+            // request.addHeader("Authorization", "Bearer " + bearerToken); // Uncomment if needed
+
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Update Category");
+                return "Failed to Update Category";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public static void main(String[] args) {
 //        checkApi();
 //        login();
@@ -271,12 +400,7 @@ public class ApiClient {
 //
 //        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
 //
-//      storeProduct(products);
-//        List<Category> c = new ArrayList<>();
-//        c.add(new Category("Fast Food "));
-//        c.add(new Category("Tandoori "));
-//        c.add(new Category(" Sweats"));
-//        storeCategory(c);
+//      
 
         loadProducts();
 
