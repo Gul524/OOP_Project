@@ -286,7 +286,7 @@ public class ApiClient {
     }
 
 
-    public static String storeStaff( Staff staff) {
+    public static boolean storeStaff( List<Staff> staff) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/addEmployee");
             request.addHeader("Content-Type", "application/json");
@@ -296,7 +296,8 @@ public class ApiClient {
                 jsonBody = _mapper.writeValueAsString(staff);
             } catch (Exception e) {
                 System.out.println("Error serializing JSON: " + e.getMessage());
-                return "Error serializing JSON: " + e.getMessage();
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return false;
             }
             request.setEntity(new StringEntity(jsonBody));
             CloseableHttpResponse response = _httpClient.execute(request);
@@ -307,15 +308,18 @@ public class ApiClient {
                 ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
                 if (responseModel.isSuccess()) {
                     System.out.println(responseModel.getMessage());
-                    return responseModel.getMessage();
+                    System.out.println(responseModel.getMessage());
+                    return true;
 
                 } else {
                     System.out.println(responseModel.getErrorCause());
-                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    System.out.println(responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    return false;
                 }
             } else {
                 System.out.println("Failed to Save staff");
-                return "Failed to Save Staff";
+                return false;
+
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

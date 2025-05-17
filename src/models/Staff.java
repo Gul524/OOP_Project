@@ -17,25 +17,19 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 public class Staff {
 
-    private enum EmployeeRoles {
-        Manager,
-        Waiter,
-        Cashier,
-        Cook,
-    }
 
     @JsonProperty(access = WRITE_ONLY)
     private int id;
     private String name;
     private int cnic;
-    private EmployeeRoles roles;
+    private String role;
 
 
 
-    public Staff(String name , int cnic, EmployeeRoles roles ){
+    public Staff(String name , int cnic, String role ){
         this.name = name;
         this.cnic = cnic;
-        this.roles = roles ;
+        this.role = role ;
 
     }
 
