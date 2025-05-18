@@ -199,6 +199,48 @@ public class ApiClient {
         }
     }
 
+    public static String updateProduct(int productId, Product product) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/updateProducts/" + productId);
+            request.addHeader("Content-Type", "application/json");
+            // Uncomment if authentication is required
+            // request.addHeader("Authorization", "Bearer " + _token);
+
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(product);
+            } catch (Exception e) {
+                String errorMessage = "Error serializing JSON: " + e.getMessage();
+                System.out.println(errorMessage);
+                return errorMessage;
+            }
+            request.setEntity(new StringEntity(jsonBody));
+
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return responseModel.getMessage() + " \nCause: " + responseModel.getErrorCause();
+                }
+            } else {
+                String errorMessage = "Failed to update product. Status code: " + statusCode;
+                System.out.println(errorMessage);
+                return errorMessage;
+            }
+        } catch (Exception e) {
+            String errorMessage = "Error updating product: " + e.getMessage();
+            System.out.println(errorMessage);
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
+
     public static List<Category> loadCategories() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/categories");
@@ -281,42 +323,6 @@ public class ApiClient {
 
     }
 
-    public static String storeCategory(List<Category> categories) {
-        try {
-            var request = new HttpPost(_baseURL + "/resApi/products/addCategory");
-            request.addHeader("Content-Type", "application/json");
-//           request.addHeader("Authorization", "Bearer " + bearerToken);
-            String jsonBody;
-            try {
-                jsonBody = _mapper.writeValueAsString(categories);
-            } catch (Exception e) {
-                System.out.println("Error serializing JSON: " + e.getMessage());
-                return "Error serializing JSON: " + e.getMessage();
-            }
-            request.setEntity(new StringEntity(jsonBody));
-            CloseableHttpResponse response = _httpClient.execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode >= 200 && statusCode <= 300) {
-                String jsonResponse = EntityUtils.toString(response.getEntity());
-
-                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
-                if (responseModel.isSuccess()) {
-                    System.out.println(responseModel.getMessage());
-                    return responseModel.getMessage();
-
-                } else {
-                    System.out.println(responseModel.getErrorCause());
-                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
-                }
-            } else {
-                System.out.println("Failed to Save Categories");
-                return "Failed to Save Categories";
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static boolean storeStaff(List<Staff> staff) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/addEmployee");
@@ -351,6 +357,42 @@ public class ApiClient {
                 System.out.println("Failed to Save staff");
                 return false;
 
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String storeCategory(List<Category> categories) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/addCategory");
+            request.addHeader("Content-Type", "application/json");
+//           request.addHeader("Authorization", "Bearer " + bearerToken);
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(categories);
+            } catch (Exception e) {
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return "Error serializing JSON: " + e.getMessage();
+            }
+            request.setEntity(new StringEntity(jsonBody));
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Save Categories");
+                return "Failed to Save Categories";
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -414,6 +456,7 @@ public class ApiClient {
     }
 
 //    public static void main(String[] args) {
+
 ////        checkApi();
 ////        login();
 ////        var productMap = loadProducts();

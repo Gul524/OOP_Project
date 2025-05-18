@@ -23,13 +23,13 @@ public class FormProducts extends javax.swing.JPanel {
 
     DefaultTableModel productTableModel = new DefaultTableModel(new Object[][] {},
             new String[] {
-                    "ID", "Name", "Size", "Flavor"
+                    "Name", "Size", "Flavor"
             }) {
         Class[] types = new Class[] {
-                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.String.class, java.lang.Object.class, java.lang.Object.class
         };
         boolean[] canEdit = new boolean[] {
-                false, false, false, false
+                false, false, false
         };
 
         public Class getColumnClass(int columnIndex) {
@@ -40,6 +40,10 @@ public class FormProducts extends javax.swing.JPanel {
             return canEdit[columnIndex];
         }
     };
+
+    private boolean isEditing = false;
+    private int editingProductId = -1;
+    private List<Integer> productIds = new ArrayList<>(); // To store product IDs internally
 
     public FormProducts() {
         initComponents();
@@ -82,6 +86,7 @@ public class FormProducts extends javax.swing.JPanel {
 
     private void filterProducts(String category, String searchText) {
         productTableModel.setRowCount(0);
+        productIds.clear();
         showProducts(productTableModel, category, searchText);
     }
 
@@ -109,11 +114,11 @@ public class FormProducts extends javax.swing.JPanel {
 
                 if (matchesSearch) {
                     tableModel.addRow(new Object[] {
-                            p.getId(),
                             p.getProductName(),
                             p.getSizesString(),
                             p.getFalovorsString()
                     });
+                    productIds.add(p.getId()); // Store the product ID internally
                 }
             }
         } catch (Exception e) {
@@ -186,9 +191,6 @@ public class FormProducts extends javax.swing.JPanel {
         jTable1.setModel(productTableModel);
         jTable1.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
-        }
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lb.setText("Products");
@@ -260,6 +262,11 @@ public class FormProducts extends javax.swing.JPanel {
         });
 
         editItem.setText("Edit Product");
+        editItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editProductActionPerformed(evt);
+            }
+        });
 
         lblCategory.setText("Category:");
 
@@ -441,35 +448,123 @@ public class FormProducts extends javax.swing.JPanel {
 
             // Create Product object
             Product product = new Product(
-                    selectedCategory.getId(), // Assuming Category has getId()
+                    selectedCategory.getId(),
                     productName,
                     price,
                     sizes,
                     flavors
             );
 
-            // Send to API
-            List<Product> products = new ArrayList<>();
-            products.add(product);
-            String result = ApiClient.addProduct(products);
-
-            if (result.contains("Success")) {
-                // Reload products from API to get the new product with assigned ID
-                ApiClient.loadProducts();
-
-                // Clear input fields
-                name.setText("");
-                ((DefaultTableModel) tblFlavors.getModel()).setRowCount(0);
-                ((DefaultTableModel) tblSizes.getModel()).setRowCount(0);
-
-                // Update table
-                productTableModel.setRowCount(0);
-                showProducts(productTableModel, "All", searchProduct.getText().trim());
-
-                JOptionPane.showMessageDialog(this, "Product added successfully!");
+            String result;
+            if (isEditing) {
+                // Update existing product
+                result = ApiClient.updateProduct(editingProductId, product);
+                if (result.contains("Success")) {
+                    JOptionPane.showMessageDialog(this, "Product updated successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to update product: " + result);
+                    return;
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to add product: " + result);
+                // Add new product
+                List<Product> products = new ArrayList<>();
+                products.add(product);
+                result = ApiClient.addProduct(products);
+                if (result.contains("Success")) {
+                    JOptionPane.showMessageDialog(this, "Product added successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to add product: " + result);
+                    return;
+                }
             }
+
+            // Reload products from API
+            ApiClient.loadProducts();
+
+            // Clear input fields and reset editing state
+            name.setText("");
+            ((DefaultTableModel) tblFlavors.getModel()).setRowCount(0);
+            ((DefaultTableModel) tblSizes.getModel()).setRowCount(0);
+            categoriesList.setSelectedIndex(0);
+            isEditing = false;
+            editingProductId = -1;
+            jLabel3.setText("Add Product");
+
+            // Update table
+            productTableModel.setRowCount(0);
+            productIds.clear();
+            Category selectedFilterCategory = (Category) categoriesList1.getSelectedItem();
+            String categoryName = selectedFilterCategory != null ? selectedFilterCategory.getCategoryName() : "All";
+            showProducts(productTableModel, categoryName, searchProduct.getText().trim());
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
+        }
+    }
+
+    private void editProductActionPerformed(java.awt.event.ActionEvent evt) {
+        try {
+            // Get the selected row index
+            int selectedRow = jTable1.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a product to edit.");
+                return;
+            }
+
+            // Get the product ID from the internal list
+            if (selectedRow >= productIds.size()) {
+                JOptionPane.showMessageDialog(this, "Invalid product selection.");
+                return;
+            }
+            editingProductId = productIds.get(selectedRow);
+
+            // Find the product in ProductData
+            Product selectedProduct = null;
+            for (List<Product> products : ProductData.categorizedProducts.values()) {
+                for (Product p : products) {
+                    if (p.getId() == editingProductId) {
+                        selectedProduct = p;
+                        break;
+                    }
+                }
+                if (selectedProduct != null) break;
+            }
+
+            if (selectedProduct == null) {
+                JOptionPane.showMessageDialog(this, "Product not found.");
+                return;
+            }
+
+            // Populate the input fields with product details
+            name.setText(selectedProduct.getProductName());
+
+            // Set category
+            for (int i = 0; i < categoriesList.getItemCount(); i++) {
+                Category category = categoriesList.getItemAt(i);
+                if (category.getId() == selectedProduct.getCategoryId()) {
+                    categoriesList.setSelectedIndex(i);
+                    break;
+                }
+            }
+
+            // Populate flavors table
+            DefaultTableModel flavorModel = (DefaultTableModel) tblFlavors.getModel();
+            flavorModel.setRowCount(0);
+            for (Flavor flavor : selectedProduct.getFlavors()) {
+                flavorModel.addRow(new Object[] { flavor.getName() });
+            }
+
+            // Populate sizes table
+            DefaultTableModel sizeModel = (DefaultTableModel) tblSizes.getModel();
+            sizeModel.setRowCount(0);
+            for (Size size : selectedProduct.getSizes()) {
+                sizeModel.addRow(new Object[] { size.getName(), size.getPrice() });
+            }
+
+            // Update UI to indicate editing mode
+            isEditing = true;
+            jLabel3.setText("Edit Product");
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
         }
@@ -540,27 +635,17 @@ public class FormProducts extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "Please select a product to delete.");
                 return;
             }
-    
-            // Get the product ID from the selected row (column 0 contains the ID)
-            int modelRow = jTable1.convertRowIndexToModel(selectedRow);
-            Object productIdObj = jTable1.getModel().getValueAt(modelRow, 0);
-            if (productIdObj == null) {
-                JOptionPane.showMessageDialog(this, "Invalid product ID.");
+
+            // Get the product ID from the internal list
+            if (selectedRow >= productIds.size()) {
+                JOptionPane.showMessageDialog(this, "Invalid product selection.");
                 return;
             }
-    
-            // Convert product ID to integer
-            int productId;
-            try {
-                productId = Integer.parseInt(productIdObj.toString());
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Invalid product ID format.");
-                return;
-            }
-    
-            // Get product name for confirmation dialog
-            String productName = (String) jTable1.getModel().getValueAt(modelRow, 1);
-    
+            int productId = productIds.get(selectedRow);
+
+            // Find product name for confirmation dialog
+            String productName = (String) jTable1.getModel().getValueAt(selectedRow, 0);
+
             // Confirm deletion with the user
             int confirm = JOptionPane.showConfirmDialog(
                     this,
@@ -569,23 +654,24 @@ public class FormProducts extends javax.swing.JPanel {
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.WARNING_MESSAGE
             );
-    
+
             if (confirm != JOptionPane.YES_OPTION) {
                 return; // User canceled the deletion
             }
-    
+
             // Call API to delete the product
             String result = ApiClient.deleteProduct(productId);
             if (result.contains("Success")) {
                 // Reload products from API
                 ApiClient.loadProducts();
-    
+
                 // Refresh the table
                 productTableModel.setRowCount(0);
+                productIds.clear();
                 Category selectedCategory = (Category) categoriesList1.getSelectedItem();
                 String categoryName = selectedCategory != null ? selectedCategory.getCategoryName() : "All";
                 showProducts(productTableModel, categoryName, searchProduct.getText().trim());
-    
+
                 JOptionPane.showMessageDialog(this, "Product deleted successfully!");
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to delete product: " + result);

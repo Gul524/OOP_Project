@@ -2,7 +2,6 @@ package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import data.ProductData;
-import logic.ApiClient;
 import models.Product;
 
 import javax.swing.*;
@@ -154,40 +153,40 @@ public class Bills extends javax.swing.JPanel {
         categoryDealsMap = new HashMap<>();
 
         // Pizzas
-        List<Product> pizzas = new ArrayList<>();
-        List<String> pizzaSizes = Arrays.asList("Small", "Medium", "Large");
-        List<String> pizzaFlavors = Arrays.asList("Pepperoni", "Fajita", "Vegetarian");
-        Map<String, Integer> pizzaPrices = new HashMap<>();
-        pizzaPrices.put("Small", 800);
-        pizzaPrices.put("Medium", 1000);
-        pizzaPrices.put("Large", 1200);
+//        List<Product> pizzas = new ArrayList<>();
+//        List<String> pizzaSizes = Arrays.asList("Small", "Medium", "Large");
+//        List<String> pizzaFlavors = Arrays.asList("Pepperoni", "Fajita", "Vegetarian");
+//        Map<String, Integer> pizzaPrices = new HashMap<>();
+//        pizzaPrices.put("Small", 800);
+//        pizzaPrices.put("Medium", 1000);
+//        pizzaPrices.put("Large", 1200);
 //        pizzas.add(new Product("P001", "Pizza", pizzaPrices, pizzaSizes, pizzaFlavors));
 
         // Drinks
-        List<Product> drinks = new ArrayList<>();
-        List<String> drinkSizes = Arrays.asList("300ML", "500ML", "1L");
-        List<String> drinkFlavors = Arrays.asList("Cola", "Lemon", "Orange");
-        Map<String, Integer> drinkPrices = new HashMap<>();
-        drinkPrices.put("300ML", 100);
-        drinkPrices.put("500ML", 150);
-        drinkPrices.put("1L", 200);
+//        List<Product> drinks = new ArrayList<>();
+//        List<String> drinkSizes = Arrays.asList("300ML", "500ML", "1L");
+//        List<String> drinkFlavors = Arrays.asList("Cola", "Lemon", "Orange");
+//        Map<String, Integer> drinkPrices = new HashMap<>();
+//        drinkPrices.put("300ML", 100);
+//        drinkPrices.put("500ML", 150);
+//        drinkPrices.put("1L", 200);
 //        drinks.add(new Product("D001", "Soft Drink", drinkPrices, drinkSizes, drinkFlavors));
 
         // Burgers
-        List<Product> burgers = new ArrayList<>();
-        List<String> burgerSizes = Arrays.asList("Small", "Medium", "Large");
-        List<String> burgerFlavors = Arrays.asList("Zinger", "Double Zinger", "Dhamaka");
-        Map<String, Integer> burgerPrices = new HashMap<>();
-        burgerPrices.put("Small", 250);
-        burgerPrices.put("Medium", 350);
-        burgerPrices.put("Large", 450);
+//        List<Product> burgers = new ArrayList<>();
+//        List<String> burgerSizes = Arrays.asList("Small", "Medium", "Large");
+//        List<String> burgerFlavors = Arrays.asList("Zinger", "Double Zinger", "Dhamaka");
+//        Map<String, Integer> burgerPrices = new HashMap<>();
+//        burgerPrices.put("Small", 250);
+//        burgerPrices.put("Medium", 350);
+//        burgerPrices.put("Large", 450);
 //        burgers.add(new Product("B001", "Burger", burgerPrices, burgerSizes, burgerFlavors));
 
         // Deals
-        List<Deal> deals = new ArrayList<>();
-        deals.add(new Deal("Family Deal", "2 Large Pizzas + 1L Drink", 2500));
-        deals.add(new Deal("Burger Combo", "2 Medium Burgers + 500ML Drink", 800));
-        deals.add(new Deal("Pizza Party", "3 Medium Pizzas + 2 300ML Drinks", 3200));
+//        List<Deal> deals = new ArrayList<>();
+//        deals.add(new Deal("Family Deal", "2 Large Pizzas + 1L Drink", 2500));
+//        deals.add(new Deal("Burger Combo", "2 Medium Burgers + 500ML Drink", 800));
+//        deals.add(new Deal("Pizza Party", "3 Medium Pizzas + 2 300ML Drinks", 3200));
 
         // Validate that all sizes have prices
 //        for (List<Product> products : new ArrayList<>(Arrays.asList(pizzas, drinks, burgers))) {
