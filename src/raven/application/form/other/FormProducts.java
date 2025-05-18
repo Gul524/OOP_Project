@@ -533,7 +533,66 @@ public class FormProducts extends javax.swing.JPanel {
     }
 
     private void dltProductActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO: Implement delete functionality
+        try {
+            // Get the selected row index
+            int selectedRow = jTable1.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a product to delete.");
+                return;
+            }
+    
+            // Get the product ID from the selected row (column 0 contains the ID)
+            int modelRow = jTable1.convertRowIndexToModel(selectedRow);
+            Object productIdObj = jTable1.getModel().getValueAt(modelRow, 0);
+            if (productIdObj == null) {
+                JOptionPane.showMessageDialog(this, "Invalid product ID.");
+                return;
+            }
+    
+            // Convert product ID to integer
+            int productId;
+            try {
+                productId = Integer.parseInt(productIdObj.toString());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid product ID format.");
+                return;
+            }
+    
+            // Get product name for confirmation dialog
+            String productName = (String) jTable1.getModel().getValueAt(modelRow, 1);
+    
+            // Confirm deletion with the user
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete the product: " + productName + "?",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+    
+            if (confirm != JOptionPane.YES_OPTION) {
+                return; // User canceled the deletion
+            }
+    
+            // Call API to delete the product
+            String result = ApiClient.deleteProduct(productId);
+            if (result.contains("Success")) {
+                // Reload products from API
+                ApiClient.loadProducts();
+    
+                // Refresh the table
+                productTableModel.setRowCount(0);
+                Category selectedCategory = (Category) categoriesList1.getSelectedItem();
+                String categoryName = selectedCategory != null ? selectedCategory.getCategoryName() : "All";
+                showProducts(productTableModel, categoryName, searchProduct.getText().trim());
+    
+                JOptionPane.showMessageDialog(this, "Product deleted successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to delete product: " + result);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
+        }
     }
 
     private javax.swing.JScrollPane Sizes;

@@ -167,6 +167,38 @@ public class ApiClient {
         }
     }
 
+    public static String deleteProduct(int id) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/deleteProducts/" + id);
+            request.addHeader("Content-Type", "application/json");
+            // Uncomment if authentication is required
+            // request.addHeader("Authorization", "Bearer " + _token);
+
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return responseModel.getMessage() + " \nCause: " + responseModel.getErrorCause();
+                }
+            } else {
+                String errorMessage = "Failed to delete product. Status code: " + statusCode;
+                System.out.println(errorMessage);
+                return errorMessage;
+            }
+        } catch (Exception e) {
+            String errorMessage = "Error deleting product: " + e.getMessage();
+            System.out.println(errorMessage);
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
+
     public static List<Category> loadCategories() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/categories");
@@ -221,7 +253,7 @@ public class ApiClient {
                 // Use TypeReference to deserialize the response correctly
                 ApiResponseModel<List<Staff>> responseModel = _mapper.readValue(
                         jsonResponse, new TypeReference<ApiResponseModel<List<Staff>>>() {
-                        }
+                }
                 );
                 if (responseModel.isSuccess()) {
                     ProductData.employees.clear();
@@ -285,8 +317,7 @@ public class ApiClient {
         }
     }
 
-
-    public static boolean storeStaff( List<Staff> staff) {
+    public static boolean storeStaff(List<Staff> staff) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/addEmployee");
             request.addHeader("Content-Type", "application/json");
@@ -353,7 +384,7 @@ public class ApiClient {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static String updateCategory(Integer categoryId, String newName) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/updateCategory/" + categoryId + "/" + newName);
@@ -381,31 +412,31 @@ public class ApiClient {
             throw new RuntimeException(e);
         }
     }
-    
-    public static void main(String[] args) {
-//        checkApi();
-//        login();
-//        var productMap = loadProducts();
-//        if (productMap != null) {
-//            System.out.println("Token: " + _token);
-//            Product firstProduct = productMap.get(1); // Access product with ID 1
-//            if (firstProduct != null) {
-//                System.out.println("Product Name: " + firstProduct.getProductName());
-//            } else {
-//                System.out.println("Product with ID 1 not found.");
-//            }
-//        }
-//
-//      List<Product> products = new ArrayList<>();
-//
-//        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
-//
-//      
 
-        loadProducts();
-
-        System.out.println(ProductData.stringCategories);
-        System.out.println(ProductData.categorizedProducts);
-
-    }
+//    public static void main(String[] args) {
+////        checkApi();
+////        login();
+////        var productMap = loadProducts();
+////        if (productMap != null) {
+////            System.out.println("Token: " + _token);
+////            Product firstProduct = productMap.get(1); // Access product with ID 1
+////            if (firstProduct != null) {
+////                System.out.println("Product Name: " + firstProduct.getProductName());
+////            } else {
+////                System.out.println("Product with ID 1 not found.");
+////            }
+////        }
+////
+////      List<Product> products = new ArrayList<>();
+////
+////        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
+////
+////      
+//
+//        loadProducts();
+//
+//        System.out.println(ProductData.stringCategories);
+//        System.out.println(ProductData.categorizedProducts);
+//
+//    }
 }
