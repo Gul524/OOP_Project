@@ -17,4 +17,8 @@ public class Size {
     public String name;
     public int price;
 
+    public Size(String sizeName, int price) {
+        this.name = sizeName;
+        this.price = price;
+    }
 }

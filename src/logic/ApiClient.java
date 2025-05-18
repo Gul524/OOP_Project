@@ -131,7 +131,7 @@ public class ApiClient {
         }
     }
 
-    static String storeProduct(List<Product> products) {
+    public static String addProduct(List<Product> products) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/addProducts");
             request.addHeader("Content-Type", "application/json");

@@ -1,52 +1,45 @@
 package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
-
 import logic.ApiClient;
 import models.Product;
-
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import models.Category;
 import data.ProductData;
 import java.awt.Component;
-
 import models.Flavor;
 import models.Size;
 
 /**
- *
  * @author anas
  */
 public class FormProducts extends javax.swing.JPanel {
-    DefaultTableModel productTableModel = new DefaultTableModel( new Object [][] {
 
-    },
-            new String [] {
-                    "ID", "Name", "Size","Flavor"
+    DefaultTableModel productTableModel = new DefaultTableModel(new Object[][] {},
+            new String[] {
+                    "ID", "Name", "Size", "Flavor"
             }) {
-        Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
+        Class[] types = new Class[] {
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
         };
-        boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+        boolean[] canEdit = new boolean[] {
+                false, false, false, false
         };
 
         public Class getColumnClass(int columnIndex) {
-            return types [columnIndex];
+            return types[columnIndex];
         }
 
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return canEdit [columnIndex];
+            return canEdit[columnIndex];
         }
-    } ;
+    };
 
     public FormProducts() {
         initComponents();
@@ -57,14 +50,12 @@ public class FormProducts extends javax.swing.JPanel {
     }
 
     private void setupSearchAndFilter() {
-        // Category filter listener
         categoriesList1.addActionListener(e -> {
             Category selectedCategory = (Category) categoriesList1.getSelectedItem();
             String categoryName = selectedCategory != null ? selectedCategory.getCategoryName() : "All";
             filterProducts(categoryName, searchProduct.getText().trim());
         });
 
-        // Search field listener
         searchProduct.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -90,7 +81,6 @@ public class FormProducts extends javax.swing.JPanel {
     }
 
     private void filterProducts(String category, String searchText) {
-        // Clear existing table data
         productTableModel.setRowCount(0);
         showProducts(productTableModel, category, searchText);
     }
@@ -111,15 +101,14 @@ public class FormProducts extends javax.swing.JPanel {
                 }
             }
 
-            // Filter by search text
             for (Product p : productsToShow) {
-                boolean matchesSearch = searchText.isEmpty() ||
-                        p.getProductName().toLowerCase().contains(searchText.toLowerCase()) ||
-                        p.getSizesString().toLowerCase().contains(searchText.toLowerCase()) ||
-                        p.getFalovorsString().toLowerCase().contains(searchText.toLowerCase());
+                boolean matchesSearch = searchText.isEmpty()
+                        || p.getProductName().toLowerCase().contains(searchText.toLowerCase())
+                        || p.getSizesString().toLowerCase().contains(searchText.toLowerCase())
+                        || p.getFalovorsString().toLowerCase().contains(searchText.toLowerCase());
 
                 if (matchesSearch) {
-                    tableModel.addRow(new Object[]{
+                    tableModel.addRow(new Object[] {
                             p.getId(),
                             p.getProductName(),
                             p.getSizesString(),
@@ -127,42 +116,39 @@ public class FormProducts extends javax.swing.JPanel {
                     });
                 }
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     void loadProducts() {
-        // Create a new list to include "All" category
         List<Category> categoriesWithAll = new ArrayList<>();
-        categoriesWithAll.add(new Category("All")); // Assuming Category has a constructor that takes a name
+        categoriesWithAll.add(new Category("All"));
         categoriesWithAll.addAll(ProductData.categories);
 
-        // Set models for combo boxes
         categoriesList.setModel(new DefaultComboBoxModel<>(ProductData.categories.toArray(new Category[0])));
         categoriesList1.setModel(new DefaultComboBoxModel<>(categoriesWithAll.toArray(new Category[0])));
         showProducts(productTableModel, "All", "");
 
-        // Set a custom renderer for the JComboBox
         categoriesList.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+                    boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Category) {
-                    setText(((Category) value).getCategoryName()); // Display only categoryName
+                    setText(((Category) value).getCategoryName());
                 }
                 return this;
             }
         });
 
-        // Set a custom renderer for the JComboBox
         categoriesList1.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+                    boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Category) {
-                    setText(((Category) value).getCategoryName()); // Display only categoryName
+                    setText(((Category) value).getCategoryName());
                 }
                 return this;
             }
@@ -170,9 +156,7 @@ public class FormProducts extends javax.swing.JPanel {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         lb = new javax.swing.JLabel();
@@ -197,8 +181,6 @@ public class FormProducts extends javax.swing.JPanel {
         searchProduct = new javax.swing.JTextField();
         lblCategory1 = new javax.swing.JLabel();
         categoriesList1 = new javax.swing.JComboBox<>();
-
-
 
         jTable1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jTable1.setModel(productTableModel);
@@ -225,19 +207,12 @@ public class FormProducts extends javax.swing.JPanel {
         });
 
         tblFlavors.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-
-                },
-                new String [] {
-                        "Flavors"
-                }
-        ) {
-            Class[] types = new Class [] {
-                    java.lang.String.class
-            };
+                new Object[][] {},
+                new String[] { "Flavors" }) {
+            Class[] types = new Class[] { java.lang.String.class };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
         });
         tblFlavors.getTableHeader().setReorderingAllowed(false);
@@ -249,19 +224,12 @@ public class FormProducts extends javax.swing.JPanel {
         jLabel2.setText("Sizes:");
 
         tblSizes.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-
-                },
-                new String [] {
-                        "Size", "Price"
-                }
-        ) {
-            Class[] types = new Class [] {
-                    java.lang.String.class, java.lang.Integer.class
-            };
+                new Object[][] {},
+                new String[] { "Size", "Price" }) {
+            Class[] types = new Class[] { java.lang.String.class, java.lang.Integer.class };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
         });
         tblSizes.getTableHeader().setReorderingAllowed(false);
@@ -295,9 +263,12 @@ public class FormProducts extends javax.swing.JPanel {
 
         lblCategory.setText("Category:");
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 24));
         jLabel3.setText("Add Product");
-        jLabel3.setToolTipText("");
+
+        lblSearch.setText("Search Product:");
+
+        lblCategory1.setText("Category:");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -341,8 +312,7 @@ public class FormProducts extends javax.swing.JPanel {
                         .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(200, 200, 200)
                                 .addComponent(jLabel3)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         jPanel1Layout.setVerticalGroup(
                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel1Layout.createSequentialGroup()
@@ -374,12 +344,7 @@ public class FormProducts extends javax.swing.JPanel {
                                         .addComponent(addProduct)
                                         .addComponent(dltProduct)
                                         .addComponent(editItem))
-                                .addGap(26, 26, 26))
-        );
-
-        lblSearch.setText("Search Product:");
-
-        lblCategory1.setText("Category:");
+                                .addGap(26, 26, 26)));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -402,8 +367,7 @@ public class FormProducts extends javax.swing.JPanel {
                                                 .addGap(18, 18, 18)
                                                 .addComponent(searchProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addGap(0, 0, Short.MAX_VALUE)))
-                                .addContainerGap())
-        );
+                                .addContainerGap()));
         layout.setVerticalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
@@ -420,60 +384,158 @@ public class FormProducts extends javax.swing.JPanel {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 482, Short.MAX_VALUE))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-    }// </editor-fold>//GEN-END:initComponents
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+    }
 
-    private void addProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addProductActionPerformed
+    public List<Flavor> getFlavorsList() {
+        List<Flavor> flavorsList = new ArrayList<>();
+        DefaultTableModel model = (DefaultTableModel) tblFlavors.getModel();
+        for (int row = 0; row < model.getRowCount(); row++) {
+            String flavorName = (String) model.getValueAt(row, 0);
+            if (flavorName != null && !flavorName.trim().isEmpty()) {
+                flavorsList.add(new Flavor(flavorName));
+            }
+        }
+        return flavorsList;
+    }
 
+    public List<Size> getSizesList() {
+        List<Size> sizesList = new ArrayList<>();
+        DefaultTableModel model = (DefaultTableModel) tblSizes.getModel();
+        for (int row = 0; row < model.getRowCount(); row++) {
+            String sizeName = (String) model.getValueAt(row, 0);
+            Integer price = (Integer) model.getValueAt(row, 1);
+            if (sizeName != null && !sizeName.trim().isEmpty() && price != null) {
+                sizesList.add(new Size(sizeName, price));
+            }
+        }
+        return sizesList;
+    }
+
+    private void addProductActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-
-            // Get product name
-            String name = JOptionPane.showInputDialog(this, "Enter Product Name:");
-            if (name == null || name.trim().isEmpty()) {
+            // Validate product name
+            String productName = name.getText().trim();
+            if (productName.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Product Name cannot be empty.");
                 return;
             }
 
-            // Get product price
-            String priceStr = JOptionPane.showInputDialog(this, "Enter Product Price:");
-            if (priceStr == null || priceStr.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Product Price cannot be empty.");
+            // Validate category
+            Category selectedCategory = (Category) categoriesList.getSelectedItem();
+            if (selectedCategory == null) {
+                JOptionPane.showMessageDialog(this, "Please select a category.");
                 return;
             }
-            int price = Integer.parseInt(priceStr.trim());
 
-            // Normally, you'd ask for Size and Flavor, but let's keep them empty for now
-            ArrayList<Size> sizes = new ArrayList<>();
-            ArrayList<Flavor> flavors = new ArrayList<>();
+            // Get flavors and sizes
+            List<Flavor> flavors = getFlavorsList();
+            List<Size> sizes = getSizesList();
+            if (sizes.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "At least one size with price is required.");
+                return;
+            }
 
-            // Create Product and add to products list
-//            Product product = new Product(categories, name, price, sizes, flavors);
-//            products.add(product);
-            JOptionPane.showMessageDialog(this, "Product added successfully!");
+            // Use the first size's price as the base price
+            int price = sizes.get(0).price;
 
-            // OPTIONAL: Update JTable here to show the new product
-            // (you can implement it if you want)
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid number format: " + ex.getMessage());
+            // Create Product object
+            Product product = new Product(
+                    selectedCategory.getId(), // Assuming Category has getId()
+                    productName,
+                    price,
+                    sizes,
+                    flavors
+            );
+
+            // Send to API
+            List<Product> products = new ArrayList<>();
+            products.add(product);
+            String result = ApiClient.addProduct(products);
+
+            if (result.contains("Success")) {
+                // Reload products from API to get the new product with assigned ID
+                ApiClient.loadProducts();
+
+                // Clear input fields
+                name.setText("");
+                ((DefaultTableModel) tblFlavors.getModel()).setRowCount(0);
+                ((DefaultTableModel) tblSizes.getModel()).setRowCount(0);
+
+                // Update table
+                productTableModel.setRowCount(0);
+                showProducts(productTableModel, "All", searchProduct.getText().trim());
+
+                JOptionPane.showMessageDialog(this, "Product added successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to add product: " + result);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
         }
-    }//GEN-LAST:event_addProductActionPerformed
+    }
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+        String flavor = JOptionPane.showInputDialog(this, "Enter Flavor:");
+        if (flavor == null || flavor.trim().isEmpty()) {
+            flavor = "-";
+        }
+        DefaultTableModel model = (DefaultTableModel) tblFlavors.getModel();
+        model.addRow(new Object[] { flavor });
+    }
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JTextField sizeField = new JTextField(15);
+        JTextField priceField = new JTextField(15);
+        panel.add(new JLabel("Size Name:"));
+        panel.add(sizeField);
+        panel.add(new JLabel("Price:"));
+        panel.add(priceField);
 
-    private void dltProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dltProductActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_dltProductActionPerformed
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                panel,
+                "Enter Size Details",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+        if (result == JOptionPane.OK_OPTION) {
+            String sizeName = sizeField.getText().trim();
+            String priceInput = priceField.getText().trim();
+
+            if (sizeName.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Size name cannot be empty.");
+                return;
+            }
+
+            Integer price = null;
+            if (!priceInput.isEmpty()) {
+                try {
+                    price = Integer.parseInt(priceInput);
+                    if (price < 0) {
+                        JOptionPane.showMessageDialog(this, "Price cannot be negative.");
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Invalid price format.");
+                    return;
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Price cannot be empty.");
+                return;
+            }
+
+            DefaultTableModel model = (DefaultTableModel) tblSizes.getModel();
+            model.addRow(new Object[] { sizeName, price });
+        }
+    }
+
+    private void dltProductActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO: Implement delete functionality
+    }
+
     private javax.swing.JScrollPane Sizes;
     private javax.swing.JButton addProduct;
     private javax.swing.JComboBox<Category> categoriesList;
@@ -498,5 +560,4 @@ public class FormProducts extends javax.swing.JPanel {
     private javax.swing.JTextField searchProduct;
     private javax.swing.JTable tblFlavors;
     private javax.swing.JTable tblSizes;
-    // End of variables declaration//GEN-END:variables
 }
