@@ -37,7 +37,7 @@ public class MainForm extends JLayeredPane {
         formStaff = new FormStaff(); // Adjust if FormStaff has a singleton pattern
         formInventory = new FormInventory(); // Adjust if FormInventory has a singleton pattern
         formBills = new Bills(); // Adjust if Bills has a singleton pattern
-
+        
         init();
     }
 

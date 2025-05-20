@@ -2,9 +2,17 @@ package raven.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import raven.toast.Notifications;
+import data.ProductData;
+import models.Order;
+import models.OrderDetail;
+import javax.swing.table.DefaultTableModel;
+import java.text.DecimalFormat;
+import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
 
 /**
- *
  * @author Raven
  */
 public class FormDashboard extends javax.swing.JPanel {
@@ -13,12 +21,110 @@ public class FormDashboard extends javax.swing.JPanel {
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
+        updateDashboard();
+        addTableDoubleClickListener();
+    }
+
+    private void updateDashboard() {
+        // Update Total Orders
+        int totalOrderCount = ProductData.orders.size();
+        totalOrders.setText(String.valueOf(totalOrderCount));
+
+        // Update Total Sales
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        double totalSalesAmount = ProductData.orders.stream()
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+        totalSales.setText("Rs. " + df.format(totalSalesAmount));
+
+        // Update Order History Table
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        for (Order order : ProductData.orders) {
+            Object[] row = {
+                order.getOrderNumber(),
+                order.getCustomerId(),
+                order.getOrderDate() + " " + order.getOrderTime(),
+                df.format(order.getAmountWithoutTax()),
+                df.format(order.getTaxAmount()),
+                df.format(order.getTotalAmount())
+            };
+            model.addRow(row);
+        }
+    }
+
+    private void addTableDoubleClickListener() {
+        jTable1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && !e.isConsumed()) {
+                    e.consume();
+                    int row = jTable1.getSelectedRow();
+                    if (row != -1) {
+                        String orderNumber = (String) jTable1.getValueAt(row, 0);
+                        Order selectedOrder = ProductData.orders.stream()
+                                .filter(order -> order.getOrderNumber().equals(orderNumber))
+                                .findFirst()
+                                .orElse(null);
+                        if (selectedOrder != null) {
+                            showOrderDetailsDialog(selectedOrder);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void showOrderDetailsDialog(Order order) {
+        // Create a new dialog
+        JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Order Details - " + order.getOrderNumber(), true);
+        dialog.setSize(600, 400);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new java.awt.BorderLayout());
+
+        // Create table for order details
+        String[] columns = {"Product Name", "Quantity", "Price", "Total"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable detailsTable = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(detailsTable);
+
+        // Populate table with order details
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        List<OrderDetail> details = order.getOrderDetails(); // Assuming Order has getOrderDetails()
+        for (OrderDetail detail : details) {
+            Object[] row = {
+                detail.getItemName(),
+                detail.getQuantity(),
+                df.format(detail.getPrice()),
+                df.format(detail.getQuantity() * detail.getPrice())
+            };
+            model.addRow(row);
+        }
+
+        // Add table to dialog
+        dialog.add(scrollPane, java.awt.BorderLayout.CENTER);
+
+        // Add Close button
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dialog.dispose());
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(closeButton);
+        dialog.add(buttonPanel, java.awt.BorderLayout.SOUTH);
+
+        // Show dialog
+        dialog.setVisible(true);
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-
         main = new javax.swing.JFrame();
         panel = new javax.swing.JPanel();
         lb = new javax.swing.JLabel();
@@ -54,10 +160,10 @@ public class FormDashboard extends javax.swing.JPanel {
 
         jPanel4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        lblTotalSales.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
+        lblTotalSales.setFont(new java.awt.Font("Segoe UI Black", 1, 24));
         lblTotalSales.setText("Total Sales");
 
-        totalSales.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        totalSales.setFont(new java.awt.Font("Segoe UI", 0, 24));
         totalSales.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -83,10 +189,10 @@ public class FormDashboard extends javax.swing.JPanel {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        lblTotalOrders.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
+        lblTotalOrders.setFont(new java.awt.Font("Segoe UI Black", 1, 24));
         lblTotalOrders.setText("Total Orders");
 
-        totalOrders.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        totalOrders.setFont(new java.awt.Font("Segoe UI", 0, 24));
         totalOrders.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -135,15 +241,13 @@ public class FormDashboard extends javax.swing.JPanel {
 
         jTable1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
+            new Object [][] {},
             new String [] {
                 "Order ID", "Customer ID", "Order Time", "Subtotal", "Tax", "Grand Total"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.Long.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false
@@ -153,7 +257,7 @@ public class FormDashboard extends javax.swing.JPanel {
                 return types [columnIndex];
             }
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
+            public boolean isCellEditable(int row, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
@@ -221,9 +325,9 @@ public class FormDashboard extends javax.swing.JPanel {
         );
 
         getAccessibleContext().setAccessibleParent(main);
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -238,5 +342,5 @@ public class FormDashboard extends javax.swing.JPanel {
     private javax.swing.JPanel panel;
     private javax.swing.JLabel totalOrders;
     private javax.swing.JLabel totalSales;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration
 }

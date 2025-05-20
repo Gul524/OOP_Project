@@ -457,7 +457,7 @@ public class ApiClient {
 
     public static List<Order> loadOrders() {
         try {
-            var request = new HttpGet(_baseURL + "/resApi/products/placeOrder");
+            var request = new HttpGet(_baseURL + "/resApi/products/orders");
 //            request.addHeader();
             CloseableHttpResponse response = _httpClient.execute(request);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -466,12 +466,12 @@ public class ApiClient {
                 // Use TypeReference to deserialize the response correctly
                 ApiResponseModel<List<Order>> responseModel = _mapper.readValue(
                         jsonResponse, new TypeReference<ApiResponseModel<List<Order>>>() {
-                        }
+                }
                 );
                 if (responseModel.isSuccess()) {
                     ProductData.orders.clear();
                     ProductData.orders = responseModel.getData();
-                    for(Order o : responseModel.getData()){
+                    for (Order o : responseModel.getData()) {
                         System.out.println(o);
                     }
                     return responseModel.getData();
@@ -496,37 +496,74 @@ public class ApiClient {
 
     }
 
+    public static String placeOrder(Order order) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/products/placeOrder");
+            request.addHeader("Content-Type", "application/json");
+//           request.addHeader("Authorization", "Bearer " + bearerToken);
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(order);
+            } catch (Exception e) {
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return "Error serializing JSON: " + e.getMessage();
+            }
+            request.setEntity(new StringEntity(jsonBody));
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
 
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return responseModel.getMessage();
 
+                } else {
+                    System.out.println(responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                }
+            } else {
+                System.out.println("Failed to Place Order");
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void main(String[] args) {
-
-        loadProducts();
-
-
-////        checkApi();
-////        login();
-////        var productMap = loadProducts();
-////        if (productMap != null) {
-////            System.out.println("Token: " + _token);
-////            Product firstProduct = productMap.get(1); // Access product with ID 1
-////            if (firstProduct != null) {
-////                System.out.println("Product Name: " + firstProduct.getProductName());
-////            } else {
-////                System.out.println("Product with ID 1 not found.");
-////            }
-////        }
-////
-////      List<Product> products = new ArrayList<>();
-////
-////        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
-////
-////      
 //
 //        loadProducts();
+//        loadOrders();
+
 //
-//        System.out.println(ProductData.stringCategories);
-//        System.out.println(ProductData.categorizedProducts);
 //
+    
+
+//////        checkApi();
+//////        login();
+//////        var productMap = loadProducts();
+//////        if (productMap != null) {
+//////            System.out.println("Token: " + _token);
+//////            Product firstProduct = productMap.get(1); // Access product with ID 1
+//////            if (firstProduct != null) {
+//////                System.out.println("Product Name: " + firstProduct.getProductName());
+//////            } else {
+//////                System.out.println("Product with ID 1 not found.");
+//////            }
+//////        }
+//////
+//////      List<Product> products = new ArrayList<>();
+//////
+//////        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
+//////
+//////      
+////
+////        loadProducts();
+////
+////        System.out.println(ProductData.stringCategories);
+////        System.out.println(ProductData.categorizedProducts);
+////
     }
 }

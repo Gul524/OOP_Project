@@ -16,13 +16,13 @@ import java.awt.*;
 
 /**
  *
- * @author Anas
+ * @author AnasJ
  */
 public class Application extends javax.swing.JFrame {
 
     private static Application app;
-    public final MainForm mainForm;
-    public final MainFormStaff mainFormStaff;
+    public static MainForm mainForm;
+    public static MainFormStaff mainFormStaff;
     private final LoginForm loginForm;
 
     public Application() {
@@ -73,6 +73,7 @@ public class Application extends javax.swing.JFrame {
         app.loginForm.applyComponentOrientation(app.getComponentOrientation());
         SwingUtilities.updateComponentTreeUI(app.loginForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
+        
     }
 
     public static void setSelectedMenu(int index, int subIndex) {
@@ -109,6 +110,7 @@ public class Application extends javax.swing.JFrame {
             ApiClient.loadCategories();
             ApiClient.loadProducts();
             ApiClient.loadStaff();
+            ApiClient.loadOrders();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
