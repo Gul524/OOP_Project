@@ -13,7 +13,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Product {
+public class                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                Product {
     @JsonProperty(access = WRITE_ONLY)
     public int id;
     @JsonProperty(access = WRITE_ONLY)

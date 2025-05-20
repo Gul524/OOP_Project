@@ -14,4 +14,5 @@ public class ProductData {
     public static Map<String, List<Product>> categorizedProducts = new HashMap<>();
     public static List<Category> categories = new ArrayList<>();
     public static List<Staff> employees = new ArrayList<>();
+    public static List<Order> orders = new ArrayList<>();
 }

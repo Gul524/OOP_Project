@@ -455,7 +455,54 @@ public class ApiClient {
         }
     }
 
-//    public static void main(String[] args) {
+    public static List<Order> loadOrders() {
+        try {
+            var request = new HttpGet(_baseURL + "/resApi/products/placeOrder");
+//            request.addHeader();
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                // Use TypeReference to deserialize the response correctly
+                ApiResponseModel<List<Order>> responseModel = _mapper.readValue(
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Order>>>() {
+                        }
+                );
+                if (responseModel.isSuccess()) {
+                    ProductData.orders.clear();
+                    ProductData.orders = responseModel.getData();
+                    for(Order o : responseModel.getData()){
+                        System.out.println(o);
+                    }
+                    return responseModel.getData();
+
+                } else if (responseModel.getErrorCause() != null) {
+                    System.out.println("Error: " + responseModel.getErrorCause());
+                    return null;
+                } else if (responseModel.getMessage() != null) {
+                    System.out.println("Error: " + responseModel.getMessage());
+                    return null;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return null;
+                }
+            } else {
+                System.out.println("Failed to Load Order");
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+
+
+    public static void main(String[] args) {
+
+        loadProducts();
+
 
 ////        checkApi();
 ////        login();
@@ -481,5 +528,5 @@ public class ApiClient {
 //        System.out.println(ProductData.stringCategories);
 //        System.out.println(ProductData.categorizedProducts);
 //
-//    }
+    }
 }
