@@ -790,6 +790,10 @@ public class Bills extends javax.swing.JPanel {
     private void printCurrentBill() {
         String currentTab = jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex());
         DefaultTableModel model = billTableModels.get(currentTab);
+        SimpleDateFormat dateFormatDate = new SimpleDateFormat("dd/MM/yy");
+        SimpleDateFormat dateFormatTime= new SimpleDateFormat("HH:mm");
+        String date = dateFormatDate.format(new Date());
+        String time = dateFormatTime.format(new Date());
 
         if (model == null || model.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this,
@@ -811,7 +815,15 @@ public class Bills extends javax.swing.JPanel {
                     break;
                 }
             }
-
+            
+            String customerId;
+            
+            if (customerField != null) {
+                customerId = customerField.getText();
+            }
+            else {
+                customerId = "Walk-in";
+            }
             final StringBuilder billContent = new StringBuilder();
             billContent.append("      MY STORE\n");
             billContent.append("  123 Business Street\n");
@@ -821,10 +833,9 @@ public class Bills extends javax.swing.JPanel {
             billContent.append("          INVOICE\n");
             billContent.append("================================\n");
             billContent.append(String.format("%-12s: %s\n", "Bill No", currentTab));
-            billContent.append(String.format("%-12s: %s\n", "Date", new SimpleDateFormat("dd/MM/yyyy").format(new Date())));
-            billContent.append(String.format("%-12s: %s\n", "Time", new SimpleDateFormat("HH:mm:ss").format(new Date())));
-            billContent.append(String.format("%-12s: %s\n", "Customer",
-                    customerField != null ? customerField.getText() : "N/A"));
+            billContent.append(String.format("%-12s: %s\n", "Date", date));
+            billContent.append(String.format("%-12s: %s\n", "Time", time));
+            billContent.append(String.format("%-12s: %s\n", "Customer", customerId));
             billContent.append("--------------------------------\n");
             billContent.append(String.format("%-16s %5s %3s %6s\n",
                     "ITEM", "PRICE", "QTY", "TOTAL"));

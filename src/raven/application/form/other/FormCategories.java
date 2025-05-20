@@ -32,7 +32,7 @@ public class FormCategories extends javax.swing.JPanel {
      * Initializes the table model with Category ID and Category Name columns.
      */
     private void initializeTable() {
-        String[] columnNames = {"Category ID", "Category Name"};
+        String[] columnNames = {"Category Name"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -56,7 +56,6 @@ public class FormCategories extends javax.swing.JPanel {
             if (categories != null && !categories.isEmpty()) {
                 for (Category category : categories) {
                     tableModel.addRow(new Object[]{
-                        category.getId(),
                         category.getCategoryName()
                     });
                 }
@@ -185,7 +184,7 @@ public class FormCategories extends javax.swing.JPanel {
 
             int catId = tableModel.getRowCount() + 1;
             // Add to table
-            tableModel.addRow(new Object[]{catId, catName});
+            tableModel.addRow(new Object[]{catName});
             JOptionPane.showMessageDialog(this, "Category added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
