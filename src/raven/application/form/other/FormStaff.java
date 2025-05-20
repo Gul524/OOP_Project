@@ -13,15 +13,21 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import logic.Refreshable;
 
 /**
  * @author Raven
  */
-public class FormStaff extends javax.swing.JPanel {
+public class FormStaff extends javax.swing.JPanel implements Refreshable {
 
+    @Override
+    public void refresh() {
+        searchStaff("");
+    }
     List<Staff> forSendStaff = new ArrayList<>();
 
     public FormStaff() {
+        putClientProperty("refreshable", true);  // Mark as refreshable
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
@@ -48,7 +54,7 @@ public class FormStaff extends javax.swing.JPanel {
         }
     };
 
-    void searchStaff(String searchText) {
+    private void searchStaff(String searchText) {
         // Clear existing rows
         staffTableModel.setRowCount(0);
 
@@ -71,10 +77,8 @@ public class FormStaff extends javax.swing.JPanel {
         }
     }
 
-    private void filterTableBySearch() {
-        // This method seems unrelated to staff; it might belong to another form.
-        // If needed for staff, it should be revised to work with staffTableModel.
-        // For now, it's left as is since it's not called in the provided code.
+    public void refreshData() {
+        searchStaff("");
     }
 
     @SuppressWarnings("unchecked")

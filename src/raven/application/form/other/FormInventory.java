@@ -9,9 +9,14 @@ import com.formdev.flatlaf.FlatClientProperties;
 public class FormInventory extends javax.swing.JPanel {
 
     public FormInventory() {
+        putClientProperty("refreshable", true);  // Mark as refreshable
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
+    }
+
+    public void refreshData() {
+
     }
 
     @SuppressWarnings("unchecked")

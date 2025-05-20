@@ -363,7 +363,7 @@ public class ApiClient {
         }
     }
 
-    public static String storeCategory(List<Category> categories) {
+    public static boolean storeCategory(List<Category> categories) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/addCategory");
             request.addHeader("Content-Type", "application/json");
@@ -373,7 +373,7 @@ public class ApiClient {
                 jsonBody = _mapper.writeValueAsString(categories);
             } catch (Exception e) {
                 System.out.println("Error serializing JSON: " + e.getMessage());
-                return "Error serializing JSON: " + e.getMessage();
+                return false;
             }
             request.setEntity(new StringEntity(jsonBody));
             CloseableHttpResponse response = _httpClient.execute(request);
@@ -384,15 +384,14 @@ public class ApiClient {
                 ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
                 if (responseModel.isSuccess()) {
                     System.out.println(responseModel.getMessage());
-                    return responseModel.getMessage();
-
+                    return true;
                 } else {
                     System.out.println(responseModel.getErrorCause());
-                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    return false;
                 }
             } else {
                 System.out.println("Failed to Save Categories");
-                return "Failed to Save Categories";
+                return false;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

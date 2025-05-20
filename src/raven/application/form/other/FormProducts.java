@@ -13,23 +13,29 @@ import java.util.List;
 import models.Category;
 import data.ProductData;
 import java.awt.Component;
+import logic.Refreshable;
 import models.Flavor;
 import models.Size;
 
 /**
  * @author anas
  */
-public class FormProducts extends javax.swing.JPanel {
+public class FormProducts extends javax.swing.JPanel implements Refreshable {
 
-    DefaultTableModel productTableModel = new DefaultTableModel(new Object[][] {},
-            new String[] {
-                    "Name", "Size", "Flavor"
+    @Override
+    public void refresh() {
+        loadProducts();
+    }
+
+    DefaultTableModel productTableModel = new DefaultTableModel(new Object[][]{},
+            new String[]{
+                "Name", "Size", "Flavor"
             }) {
-        Class[] types = new Class[] {
-                java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+        Class[] types = new Class[]{
+            java.lang.String.class, java.lang.Object.class, java.lang.Object.class
         };
-        boolean[] canEdit = new boolean[] {
-                false, false, false
+        boolean[] canEdit = new boolean[]{
+            false, false, false
         };
 
         public Class getColumnClass(int columnIndex) {
@@ -46,6 +52,7 @@ public class FormProducts extends javax.swing.JPanel {
     private List<Integer> productIds = new ArrayList<>(); // To store product IDs internally
 
     public FormProducts() {
+        putClientProperty("refreshable", true);  // Mark as refreshable
         initComponents();
         loadProducts();
         lb.putClientProperty(FlatClientProperties.STYLE, ""
@@ -113,10 +120,10 @@ public class FormProducts extends javax.swing.JPanel {
                         || p.getFalovorsString().toLowerCase().contains(searchText.toLowerCase());
 
                 if (matchesSearch) {
-                    tableModel.addRow(new Object[] {
-                            p.getProductName(),
-                            p.getSizesString(),
-                            p.getFalovorsString()
+                    tableModel.addRow(new Object[]{
+                        p.getProductName(),
+                        p.getSizesString(),
+                        p.getFalovorsString()
                     });
                     productIds.add(p.getId()); // Store the product ID internally
                 }
@@ -126,7 +133,7 @@ public class FormProducts extends javax.swing.JPanel {
         }
     }
 
-    void loadProducts() {
+    private void loadProducts() {
         List<Category> categoriesWithAll = new ArrayList<>();
         categoriesWithAll.add(new Category("All"));
         categoriesWithAll.addAll(ProductData.categories);
@@ -158,6 +165,11 @@ public class FormProducts extends javax.swing.JPanel {
                 return this;
             }
         });
+    }
+
+    public void refreshData() {
+        loadProducts();
+
     }
 
     @SuppressWarnings("unchecked")
@@ -209,9 +221,9 @@ public class FormProducts extends javax.swing.JPanel {
         });
 
         tblFlavors.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] { "Flavors" }) {
-            Class[] types = new Class[] { java.lang.String.class };
+                new Object[][]{},
+                new String[]{"Flavors"}) {
+            Class[] types = new Class[]{java.lang.String.class};
 
             public Class getColumnClass(int columnIndex) {
                 return types[columnIndex];
@@ -226,9 +238,9 @@ public class FormProducts extends javax.swing.JPanel {
         jLabel2.setText("Sizes:");
 
         tblSizes.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] { "Size", "Price" }) {
-            Class[] types = new Class[] { java.lang.String.class, java.lang.Integer.class };
+                new Object[][]{},
+                new String[]{"Size", "Price"}) {
+            Class[] types = new Class[]{java.lang.String.class, java.lang.Integer.class};
 
             public Class getColumnClass(int columnIndex) {
                 return types[columnIndex];
@@ -527,7 +539,9 @@ public class FormProducts extends javax.swing.JPanel {
                         break;
                     }
                 }
-                if (selectedProduct != null) break;
+                if (selectedProduct != null) {
+                    break;
+                }
             }
 
             if (selectedProduct == null) {
@@ -551,14 +565,14 @@ public class FormProducts extends javax.swing.JPanel {
             DefaultTableModel flavorModel = (DefaultTableModel) tblFlavors.getModel();
             flavorModel.setRowCount(0);
             for (Flavor flavor : selectedProduct.getFlavors()) {
-                flavorModel.addRow(new Object[] { flavor.getName() });
+                flavorModel.addRow(new Object[]{flavor.getName()});
             }
 
             // Populate sizes table
             DefaultTableModel sizeModel = (DefaultTableModel) tblSizes.getModel();
             sizeModel.setRowCount(0);
             for (Size size : selectedProduct.getSizes()) {
-                sizeModel.addRow(new Object[] { size.getName(), size.getPrice() });
+                sizeModel.addRow(new Object[]{size.getName(), size.getPrice()});
             }
 
             // Update UI to indicate editing mode
@@ -576,7 +590,7 @@ public class FormProducts extends javax.swing.JPanel {
             flavor = "-";
         }
         DefaultTableModel model = (DefaultTableModel) tblFlavors.getModel();
-        model.addRow(new Object[] { flavor });
+        model.addRow(new Object[]{flavor});
     }
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -623,7 +637,7 @@ public class FormProducts extends javax.swing.JPanel {
             }
 
             DefaultTableModel model = (DefaultTableModel) tblSizes.getModel();
-            model.addRow(new Object[] { sizeName, price });
+            model.addRow(new Object[]{sizeName, price});
         }
     }
 

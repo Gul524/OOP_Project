@@ -35,11 +35,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import logic.ApiClient;
+import logic.Refreshable;
 import models.Order;
 import models.OrderDealDetail;
 import models.OrderDetail;
+import raven.application.Application;
 
-public class Bills extends javax.swing.JPanel {
+public class Bills extends javax.swing.JPanel implements Refreshable {
+
+    @Override
+    public void refresh() {
+        setupProductsTable();
+    }
 
     private int billSeries = 1;
     private DefaultTableModel productsTableModel;
@@ -143,6 +150,7 @@ public class Bills extends javax.swing.JPanel {
     }
 
     public Bills() {
+        putClientProperty("refreshable", true);  // Mark as refreshable
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, "font:$h1.font");
         initializeData();
@@ -304,6 +312,10 @@ public class Bills extends javax.swing.JPanel {
             }
 
         });
+    }
+
+    public void refreshData() {
+        setupProductsTable();
     }
 
     // Helper method to find product by ID
@@ -797,7 +809,7 @@ public class Bills extends javax.swing.JPanel {
         String date = dateFormatDate.format(new Date());
         String time = dateFormatTime.format(new Date());
         String orderNumber = currentTab;
-    
+
         if (model == null || model.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this,
                     "No items in the bill to print",
@@ -805,56 +817,55 @@ public class Bills extends javax.swing.JPanel {
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
-    
+
         try {
             JPanel currentPanel = billPanels.get(currentTab);
             JPanel contentPanel = (JPanel) currentPanel.getComponent(0);
             JLabel grandTotalLabel = billGrandTotals.get(currentTab);
-    
+
             // Debug: Print component hierarchy
             System.out.println("=== COMPONENT TREE ===");
             printComponentTree(contentPanel, 0);
-    
+
             // Find components using improved search
             JTextField customerField = findComponent(JTextField.class, contentPanel);
             JRadioButton walkInRadio = findRadioButton("Walk-in", contentPanel);
             JRadioButton regularRadio = findRadioButton("Regular", contentPanel);
-    
+
             // Debug: Print found components
             System.out.println("\n=== FOUND COMPONENTS ===");
-            System.out.println("Customer Field: " + (customerField != null 
-                ? "'" + customerField.getText() + "'" : "Not Found"));
-            System.out.println("Walk-in Radio: " + (walkInRadio != null 
-                ? (walkInRadio.isSelected() ? "Selected" : "Not Selected") : "Not Found"));
-            System.out.println("Regular Radio: " + (regularRadio != null 
-                ? (regularRadio.isSelected() ? "Selected" : "Not Selected") : "Not Found"));
-    
+            System.out.println("Customer Field: " + (customerField != null
+                    ? "'" + customerField.getText() + "'" : "Not Found"));
+            System.out.println("Walk-in Radio: " + (walkInRadio != null
+                    ? (walkInRadio.isSelected() ? "Selected" : "Not Selected") : "Not Found"));
+            System.out.println("Regular Radio: " + (regularRadio != null
+                    ? (regularRadio.isSelected() ? "Selected" : "Not Selected") : "Not Found"));
+
             // Validate customer components
             String customerId = "Walk-in";
             if (regularRadio != null && regularRadio.isSelected()) {
                 if (customerField == null) {
                     JOptionPane.showMessageDialog(this,
-                        "System Error: Customer ID field not found!",
-                        "Configuration Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "System Error: Customer ID field not found!",
+                            "Configuration Error",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-    
+
                 String enteredId = customerField.getText().trim();
                 if (enteredId.isEmpty()) {
                     customerField.requestFocusInWindow();
                     JOptionPane.showMessageDialog(this,
-                        "Please enter Customer ID for Regular customer",
-                        "Input Required",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please enter Customer ID for Regular customer",
+                            "Input Required",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
                 customerId = enteredId;
-            }
-            else if (walkInRadio != null && walkInRadio.isSelected()) {
+            } else if (walkInRadio != null && walkInRadio.isSelected()) {
                 customerId = "Walk-in";
             }
-    
+
             // Build bill content
             StringBuilder billContent = new StringBuilder();
             billContent.append("      Rayyan Butt Karahi\n");
@@ -871,7 +882,7 @@ public class Bills extends javax.swing.JPanel {
             billContent.append("--------------------------------\n");
             billContent.append(String.format("%-16s %5s %3s %6s\n", "ITEM", "PRICE", "QTY", "TOTAL"));
             billContent.append("--------------------------------\n");
-    
+
             List<OrderDetail> orderDetails = new ArrayList<>();
             for (int i = 0; i < model.getRowCount(); i++) {
                 String item = (String) model.getValueAt(i, 0);
@@ -881,11 +892,11 @@ public class Bills extends javax.swing.JPanel {
                 billContent.append(String.format("%-20s %5d %3d %6d\n", item, price, qty, total));
                 orderDetails.add(new OrderDetail(item, qty, total));
             }
-    
+
             billContent.append("--------------------------------\n");
             String subtotalText = grandTotalLabel != null ? grandTotalLabel.getText() : "0";
             billContent.append(String.format("%-24s %6s\n", "SUBTOTAL", subtotalText));
-    
+
             double subtotal;
             try {
                 subtotal = Double.parseDouble(subtotalText.replaceAll("[^\\d.]", ""));
@@ -894,70 +905,74 @@ public class Bills extends javax.swing.JPanel {
             }
             double tax = subtotal * 0.10;
             double grandTotal = subtotal + tax;
-    
+
             billContent.append(String.format("%-24s %6.2f\n", "TAX (10%)", tax));
             billContent.append(String.format("%-24s %6.2f\n", "GRAND TOTAL", grandTotal));
             billContent.append("================================\n");
             billContent.append("  Thank you for your purchase!\n");
             billContent.append("  Please come again!\n");
             billContent.append("================================\n");
-    
+
             // Create and send order
             List<OrderDealDetail> orderDealDetails = null;
             Order order = new Order(
-                orderNumber,
-                customerId,
-                time,
-                date,
-                grandTotal,
-                tax,
-                subtotal,
-                orderDetails,
-                orderDealDetails
+                    orderNumber,
+                    customerId,
+                    time,
+                    date,
+                    grandTotal,
+                    tax,
+                    subtotal,
+                    orderDetails,
+                    orderDealDetails
             );
-    
+
             String result = ApiClient.placeOrder(order);
             System.out.println("API Response: " + result);
-            
+
             if (result == null || result.toLowerCase().contains("error")) {
                 JOptionPane.showMessageDialog(this,
-                    "Order submission failed: " + result,
-                    "Server Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Order submission failed: " + result,
+                        "Server Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
-    
+
+            Application.refreshApplication();
+
             // Print handling
             PrinterJob printerJob = PrinterJob.getPrinterJob();
             PageFormat pageFormat = printerJob.defaultPage();
-            
+
             Paper paper = new Paper();
             double paperWidth = 3.5 * 72; // 3.5 inches in points
             double paperHeight = 11 * 72; // 11 inches in points
             paper.setSize(paperWidth, paperHeight);
             paper.setImageableArea(
-                18, // 0.25 inch left margin
-                18, // 0.25 inch top margin
-                paperWidth - 36, // 0.5 inch total horizontal margin
-                paperHeight - 36  // 0.5 inch total vertical margin
+                    18, // 0.25 inch left margin
+                    18, // 0.25 inch top margin
+                    paperWidth - 36, // 0.5 inch total horizontal margin
+                    paperHeight - 36 // 0.5 inch total vertical margin
             );
             pageFormat.setPaper(paper);
             pageFormat.setOrientation(PageFormat.PORTRAIT);
-    
+
             printerJob.setPrintable(new Printable() {
                 @Override
                 public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) {
-                    if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
-                    
+                    if (pageIndex > 0) {
+                        return Printable.NO_SUCH_PAGE;
+                    }
+
                     Graphics2D g2d = (Graphics2D) graphics;
                     g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-                    
+
                     Font font = new Font(Font.MONOSPACED, Font.PLAIN, 10);
                     g2d.setFont(font);
-                    
+
                     String[] lines = billContent.toString().split("\n");
                     int yPos = 15;
-                    
+
                     for (String line : lines) {
                         g2d.drawString(line, 10, yPos);
                         yPos += 12;
@@ -965,27 +980,27 @@ public class Bills extends javax.swing.JPanel {
                     return Printable.PAGE_EXISTS;
                 }
             }, pageFormat);
-    
+
             if (printerJob.printDialog()) {
                 try {
                     printerJob.print();
                 } catch (PrinterException ex) {
                     JOptionPane.showMessageDialog(this,
-                        "Print failed: " + ex.getMessage(),
-                        "Print Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Print failed: " + ex.getMessage(),
+                            "Print Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
-    
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Unexpected error: " + e.getMessage(),
-                "System Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Unexpected error: " + e.getMessage(),
+                    "System Error",
+                    JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
-    
+
     // Helper methods
     private <T extends Component> T findComponent(Class<T> componentType, Container container) {
         for (Component comp : container.getComponents()) {
@@ -994,12 +1009,14 @@ public class Bills extends javax.swing.JPanel {
             }
             if (comp instanceof Container) {
                 T found = findComponent(componentType, (Container) comp);
-                if (found != null) return found;
+                if (found != null) {
+                    return found;
+                }
             }
         }
         return null;
     }
-    
+
     private JRadioButton findRadioButton(String buttonText, Container container) {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JRadioButton) {
@@ -1010,31 +1027,35 @@ public class Bills extends javax.swing.JPanel {
             }
             if (comp instanceof Container) {
                 JRadioButton found = findRadioButton(buttonText, (Container) comp);
-                if (found != null) return found;
+                if (found != null) {
+                    return found;
+                }
             }
         }
         return null;
     }
-    
+
     private void printComponentTree(Component component, int depth) {
         StringBuilder indent = new StringBuilder();
-        for (int i = 0; i < depth; i++) indent.append("  ");
-        
+        for (int i = 0; i < depth; i++) {
+            indent.append("  ");
+        }
+
         String componentInfo = String.format("%s%s [%s]",
-            indent.toString(),
-            component.getClass().getSimpleName(),
-            getComponentState(component)
+                indent.toString(),
+                component.getClass().getSimpleName(),
+                getComponentState(component)
         );
-        
+
         System.out.println(componentInfo);
-        
+
         if (component instanceof Container) {
             for (Component child : ((Container) component).getComponents()) {
                 printComponentTree(child, depth + 1);
             }
         }
     }
-    
+
     private String getComponentState(Component comp) {
         if (comp instanceof JTextField) {
             return "Text: '" + ((JTextField) comp).getText() + "'";

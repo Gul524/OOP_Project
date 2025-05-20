@@ -12,19 +12,32 @@ import logic.ApiClient;
 import data.ProductData;
 import java.util.ArrayList;
 import java.util.List;
+import logic.Refreshable;
+import raven.application.Application;
+import raven.application.form.MainForm;
 
 /**
  *
  * @author anasj
  */
-public class FormCategories extends javax.swing.JPanel {
+public class FormCategories extends javax.swing.JPanel implements Refreshable {
 
     private DefaultTableModel tableModel;
 
+    @Override
+    public void refresh() {
+        loadCategories();
+    }
+
     public FormCategories() {
+        putClientProperty("refreshable", true);  // Mark as refreshable
         initComponents();
         lb.putClientProperty(FlatClientProperties.STYLE, "font:$h1.font");
         initializeTable();
+        loadCategories();
+    }
+
+    public void refreshData() {
         loadCategories();
     }
 
@@ -180,12 +193,19 @@ public class FormCategories extends javax.swing.JPanel {
             categoriesToSave.add(newCategory);
 
             // Save to database
-            ApiClient.storeCategory(categoriesToSave);
+            boolean isSaved = ApiClient.storeCategory(categoriesToSave);
 
-            int catId = tableModel.getRowCount() + 1;
             // Add to table
-            tableModel.addRow(new Object[]{catName});
-            JOptionPane.showMessageDialog(this, "Category added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            if (isSaved) {
+                tableModel.addRow(new Object[]{catName});
+                JOptionPane.showMessageDialog(this, "Category added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                MainForm mainForm = new MainForm();
+                Application.refreshApplication();
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to add category", "Error", JOptionPane.INFORMATION_MESSAGE);
+            }
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Error adding category: Not connected to internet",
@@ -196,6 +216,15 @@ public class FormCategories extends javax.swing.JPanel {
         }
     }
 
+    private int checkId(String categoryName) {
+        for (Category c : ProductData.categories) {
+            if (c.getCategoryName().equals(categoryName)) {
+                return c.getId();
+            }
+        }
+        return 0;
+    }
+
     private void dltItemActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = jTable1.getSelectedRow();
         if (selectedRow == -1) {
@@ -203,8 +232,8 @@ public class FormCategories extends javax.swing.JPanel {
             return;
         }
 
-        int catID = (int) tableModel.getValueAt(selectedRow, 0);
-        String catName = (String) tableModel.getValueAt(selectedRow, 1);
+        String catName = (String) tableModel.getValueAt(selectedRow, 0);
+        int catID = checkId(catName);
 
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to delete category: " + catName + "?",
@@ -217,6 +246,8 @@ public class FormCategories extends javax.swing.JPanel {
                 ApiClient.deleteCategory(catID);
                 tableModel.removeRow(selectedRow);
                 JOptionPane.showMessageDialog(this, "Category deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                MainForm mainForm = new MainForm();
+                Application.refreshApplication();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
                         "Error deleting category: Not connected to internet",
@@ -263,6 +294,7 @@ public class FormCategories extends javax.swing.JPanel {
             tableModel.setValueAt(newCatName, selectedRow, 1);
 
             JOptionPane.showMessageDialog(this, "Category updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            Application.refreshApplication();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Error updating category: Not connected to internet",

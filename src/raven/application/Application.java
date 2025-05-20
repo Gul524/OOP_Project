@@ -41,7 +41,7 @@ public class Application extends javax.swing.JFrame {
         component.applyComponentOrientation(app.getComponentOrientation());
         app.mainForm.showForm(component);
     }
-    
+
     public static void showFormStaff(Component component) {
         component.applyComponentOrientation(app.getComponentOrientation());
         app.mainFormStaff.showForm(component);
@@ -56,7 +56,7 @@ public class Application extends javax.swing.JFrame {
         SwingUtilities.updateComponentTreeUI(app.mainForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
-    
+
     public static void loginStaff() {
         FlatAnimatedLafChange.showSnapshot();
         app.setContentPane(app.mainFormStaff);
@@ -73,13 +73,13 @@ public class Application extends javax.swing.JFrame {
         app.loginForm.applyComponentOrientation(app.getComponentOrientation());
         SwingUtilities.updateComponentTreeUI(app.loginForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
-        
+
     }
 
     public static void setSelectedMenu(int index, int subIndex) {
         app.mainForm.setSelectedMenu(index, subIndex);
     }
-    
+
     public static void setSelectedMenuStaff(int index, int subIndex) {
         app.mainFormStaff.setSelectedMenu(index, subIndex);
     }
@@ -104,9 +104,19 @@ public class Application extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    public static void refreshApplication() {
+        if (mainForm != null) {
+            mainForm.refreshAll();
+        }
+        if (mainFormStaff != null) {
+            mainForm.refreshAll();
+        }
+        SwingUtilities.updateComponentTreeUI(app);
+    }
+
     public static void main(String args[]) {
         FlatRobotoFont.install();
-        try{
+        try {
             ApiClient.loadCategories();
             ApiClient.loadProducts();
             ApiClient.loadStaff();

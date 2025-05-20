@@ -13,6 +13,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.security.auth.RefreshFailedException;
+import javax.security.auth.Refreshable;
+import logic.ApiClient;
 
 /**
  * @author Raven
@@ -37,8 +42,58 @@ public class MainForm extends JLayeredPane {
         formStaff = new FormStaff(); // Adjust if FormStaff has a singleton pattern
         formInventory = new FormInventory(); // Adjust if FormInventory has a singleton pattern
         formBills = new Bills(); // Adjust if Bills has a singleton pattern
-        
+
         init();
+    }
+
+    public void refreshAll() {
+        // Refresh data from API
+        ApiClient.loadCategories();
+        ApiClient.loadOrders();
+        ApiClient.loadProducts();
+        ApiClient.loadStaff();
+
+        // Refresh all forms
+        formDashboard.refreshData();
+        formCategories.refreshData();
+        formProducts.refreshData();
+        formDeals.refreshData();
+        formStaff.refreshData();
+        formInventory.refreshData();
+        formBills.refreshData();
+
+        // Refresh the currently visible form only if panelBody has components
+        if (panelBody.getComponentCount() > 0) {
+            Component current = panelBody.getComponent(0);
+            if (current instanceof Refreshable) {
+                try {
+                    ((Refreshable) current).refresh();
+                } catch (RefreshFailedException ex) {
+                    Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            // Specific form refreshes (redundant with the above Refreshable check)
+            if (current instanceof FormDashboard) {
+                ((FormDashboard) current).refreshData();
+            } else if (current instanceof FormCategories) {
+                ((FormCategories) current).refreshData();
+            } else if (current instanceof FormProducts) {
+                ((FormProducts) current).refreshData();
+            } else if (current instanceof FormDeals) {
+                ((FormDeals) current).refreshData();
+            } else if (current instanceof FormStaff) {
+                ((FormStaff) current).refreshData();
+            } else if (current instanceof FormInventory) {
+                ((FormInventory) current).refreshData();
+            } else if (current instanceof Bills) {
+                ((Bills) current).refreshData();
+            }
+        }
+
+        // Force UI update
+        revalidate();
+        repaint();
     }
 
     private void init() {
@@ -79,7 +134,8 @@ public class MainForm extends JLayeredPane {
     private void initMenuEvent() {
         menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
             switch (index) {
-                case 0 -> Application.showForm(formDashboard);
+                case 0 ->
+                    Application.showForm(formDashboard);
                 case 1 -> {
                     if (subIndex == 1) {
                         Application.showForm(formCategories);
@@ -91,11 +147,16 @@ public class MainForm extends JLayeredPane {
                         Application.showForm(formDeals);
                     }
                 }
-                case 2 -> Application.showForm(formStaff);
-                case 3 -> Application.showForm(formInventory);
-                case 4 -> Application.showForm(formBills);
-                case 5 -> Application.logout();
-                default -> action.cancel();
+                case 2 ->
+                    Application.showForm(formStaff);
+                case 3 ->
+                    Application.showForm(formInventory);
+                case 4 ->
+                    Application.showForm(formBills);
+                case 5 ->
+                    Application.logout();
+                default ->
+                    action.cancel();
             }
         });
     }
