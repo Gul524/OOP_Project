@@ -16,6 +16,7 @@ import java.awt.Component;
 import logic.Refreshable;
 import models.Flavor;
 import models.Size;
+import raven.toast.Notifications;
 
 /**
  * @author anas
@@ -92,27 +93,46 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
     }
 
     private void filterProducts(String category, String searchText) {
+        // Clear existing data
         productTableModel.setRowCount(0);
         productIds.clear();
-        showProducts(productTableModel, category, searchText);
+
+        // Handle "All" category specially
+        if ("All".equals(category)) {
+            // Show products from all categories
+            for (String cat : ProductData.categorizedProducts.keySet()) {
+                showProducts(productTableModel, cat, searchText);
+            }
+        } else {
+            // Show products from specific category
+            showProducts(productTableModel, category, searchText);
+        }
     }
 
     void showProducts(DefaultTableModel tableModel, String category, String searchText) {
         try {
-            List<Product> productsToShow;
+            // Clear existing rows
+            tableModel.setRowCount(0);
+            productIds.clear();
+
+            List<Product> productsToShow = new ArrayList<>();
 
             if ("All".equals(category)) {
-                productsToShow = new ArrayList<>();
-                for (List<Product> products : ProductData.categorizedProducts.values()) {
-                    productsToShow.addAll(products);
+                // Get all products from all categories
+                for (List<Product> categoryProducts : ProductData.categorizedProducts.values()) {
+                    if (categoryProducts != null) {
+                        productsToShow.addAll(categoryProducts);
+                    }
                 }
             } else {
+                // Get products for specific category
                 productsToShow = ProductData.categorizedProducts.get(category);
                 if (productsToShow == null) {
-                    return;
+                    return; // No products for this category
                 }
             }
 
+            // Apply search filter
             for (Product p : productsToShow) {
                 boolean matchesSearch = searchText.isEmpty()
                         || p.getProductName().toLowerCase().contains(searchText.toLowerCase())
@@ -125,27 +145,44 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
                         p.getSizesString(),
                         p.getFalovorsString()
                     });
-                    productIds.add(p.getId()); // Store the product ID internally
+                    productIds.add(p.getId());
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(this, "Error loading products: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void loadProducts() {
-        List<Category> categoriesWithAll = new ArrayList<>();
-        categoriesWithAll.add(new Category("All"));
-        categoriesWithAll.addAll(ProductData.categories);
+        // Clear existing items first
+        categoriesList.setModel(new DefaultComboBoxModel<>());
+        categoriesList1.setModel(new DefaultComboBoxModel<>());
 
+        // Create fresh category lists
+        List<Category> categoriesWithAll = new ArrayList<>();
+        categoriesWithAll.add(new Category("All")); // Add "All" option first
+
+        // Add actual categories
+        if (ProductData.categories != null) {
+            categoriesWithAll.addAll(ProductData.categories);
+        }
+
+        // Set models with proper data
         categoriesList.setModel(new DefaultComboBoxModel<>(ProductData.categories.toArray(new Category[0])));
         categoriesList1.setModel(new DefaultComboBoxModel<>(categoriesWithAll.toArray(new Category[0])));
+
+        // Set default selection to "All"
+        categoriesList1.setSelectedIndex(0);
+
+        // Refresh product table
         showProducts(productTableModel, "All", "");
 
+        // Custom renderers (unchanged)
         categoriesList.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Category) {
                     setText(((Category) value).getCategoryName());
@@ -156,8 +193,8 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
 
         categoriesList1.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Category) {
                     setText(((Category) value).getCategoryName());
@@ -484,6 +521,7 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
                 result = ApiClient.addProduct(products);
                 if (result.contains("Success")) {
                     JOptionPane.showMessageDialog(this, "Product added successfully!");
+                    Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Please logout and login again to apply changes");
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to add product: " + result);
                     return;
@@ -574,6 +612,8 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
             for (Size size : selectedProduct.getSizes()) {
                 sizeModel.addRow(new Object[]{size.getName(), size.getPrice()});
             }
+
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Hello sample message");
 
             // Update UI to indicate editing mode
             isEditing = true;
@@ -677,7 +717,7 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
             String result = ApiClient.deleteProduct(productId);
             if (result.contains("Success")) {
                 // Reload products from API
-                ApiClient.loadProducts();
+//                ApiClient.loadProducts();
 
                 // Refresh the table
                 productTableModel.setRowCount(0);
@@ -687,6 +727,7 @@ public class FormProducts extends javax.swing.JPanel implements Refreshable {
                 showProducts(productTableModel, categoryName, searchProduct.getText().trim());
 
                 JOptionPane.showMessageDialog(this, "Product deleted successfully!");
+                Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Hello sample message");
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to delete product: " + result);
             }

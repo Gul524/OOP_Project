@@ -15,6 +15,7 @@ import java.util.List;
 import logic.Refreshable;
 import raven.application.Application;
 import raven.application.form.MainForm;
+import raven.toast.Notifications;
 
 /**
  *
@@ -199,8 +200,7 @@ public class FormCategories extends javax.swing.JPanel implements Refreshable {
             if (isSaved) {
                 tableModel.addRow(new Object[]{catName});
                 JOptionPane.showMessageDialog(this, "Category added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                MainForm mainForm = new MainForm();
-                Application.refreshApplication();
+                Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Please logout and login again to apply changes");
 
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to add category", "Error", JOptionPane.INFORMATION_MESSAGE);
@@ -246,8 +246,8 @@ public class FormCategories extends javax.swing.JPanel implements Refreshable {
                 ApiClient.deleteCategory(catID);
                 tableModel.removeRow(selectedRow);
                 JOptionPane.showMessageDialog(this, "Category deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                MainForm mainForm = new MainForm();
-                Application.refreshApplication();
+                Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Please logout and login again to apply changes");
+
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
                         "Error deleting category: Not connected to internet",
@@ -266,8 +266,8 @@ public class FormCategories extends javax.swing.JPanel implements Refreshable {
             return;
         }
 
-        Object idObj = tableModel.getValueAt(selectedRow, 0);
-        String oldCatName = (String) tableModel.getValueAt(selectedRow, 1);
+        String oldCatName = (String) tableModel.getValueAt(selectedRow, 0);
+        int catId = checkId(oldCatName);
 
         String newCatName = JOptionPane.showInputDialog(this, "Enter new Category Name:", oldCatName);
         if (newCatName == null || newCatName.trim().isEmpty()) {
@@ -277,24 +277,16 @@ public class FormCategories extends javax.swing.JPanel implements Refreshable {
 
         try {
             // Send update request to backend
-            int catId;
-            if (idObj instanceof Integer) {
-                catId = (Integer) idObj;
-            } else if (idObj instanceof String) {
-                // If IDs are strings like "C001", "C002"
-                String idStr = ((String) idObj).replaceAll("[^\\d]", "");
-                catId = Integer.parseInt(idStr);
-            } else {
-                throw new IllegalArgumentException("Unknown ID format: " + idObj);
-            }
+            
 
             ApiClient.updateCategory(catId, newCatName); // <-- call the proper method to update category
 
             // Update the table
-            tableModel.setValueAt(newCatName, selectedRow, 1);
+            tableModel.setValueAt(newCatName, selectedRow, 0);
 
             JOptionPane.showMessageDialog(this, "Category updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            Application.refreshApplication();
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Please logout and login again to apply changes");
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Error updating category: Not connected to internet",

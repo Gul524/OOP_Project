@@ -40,6 +40,7 @@ import models.Order;
 import models.OrderDealDetail;
 import models.OrderDetail;
 import raven.application.Application;
+import raven.toast.Notifications;
 
 public class Bills extends javax.swing.JPanel implements Refreshable {
 
@@ -938,7 +939,7 @@ public class Bills extends javax.swing.JPanel implements Refreshable {
                 return;
             }
 
-            Application.refreshApplication();
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Please logout and login again to apply changes");
 
             // Print handling
             PrinterJob printerJob = PrinterJob.getPrinterJob();
