@@ -363,6 +363,48 @@ public class ApiClient {
         }
     }
 
+    public static boolean storeInventory(List<Staff> staff) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/addEmployee");
+            request.addHeader("Content-Type", "application/json");
+//           request.addHeader("Authorization", "Bearer " + bearerToken);
+            String jsonBody;
+            try {
+                jsonBody = _mapper.writeValueAsString(staff);
+            } catch (Exception e) {
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                System.out.println("Error serializing JSON: " + e.getMessage());
+                return false;
+            }
+            request.setEntity(new StringEntity(jsonBody));
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    System.out.println(responseModel.getMessage());
+                    return true;
+
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    System.out.println(responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    return false;
+                }
+            } else {
+                System.out.println("Failed to Save staff");
+                return false;
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
     public static boolean storeCategory(List<Category> categories) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/addCategory");
@@ -454,6 +496,45 @@ public class ApiClient {
         }
     }
 
+    public static List<Inventory> loadInventory() {
+        try {
+            var request = new HttpGet(_baseURL + "/resApi/inventoryLog");
+//            request.addHeader();
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                // Use TypeReference to deserialize the response correctly
+                ApiResponseModel<List<Inventory>> responseModel = _mapper.readValue(
+                        jsonResponse, new TypeReference<ApiResponseModel<List<Inventory>>>() {
+                        }
+                );
+                if (responseModel.isSuccess()) {
+                    ProductData.inventry.clear();
+                    ProductData.inventry = responseModel.getData();
+
+                    return responseModel.getData();
+
+                } else if (responseModel.getErrorCause() != null) {
+                    System.out.println("Error: " + responseModel.getErrorCause());
+                    return null;
+                } else if (responseModel.getMessage() != null) {
+                    System.out.println("Error: " + responseModel.getMessage());
+                    return null;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return null;
+                }
+            } else {
+                System.out.println("Failed to Load Order");
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     public static List<Order> loadOrders() {
         try {
             var request = new HttpGet(_baseURL + "/resApi/products/orders");
@@ -538,7 +619,7 @@ public class ApiClient {
 
 //
 //
-    
+
 
 //////        checkApi();
 //////        login();
@@ -557,7 +638,7 @@ public class ApiClient {
 //////
 //////        products.add(new Product(1,"Fajita",1000 , new ArrayList<Size>() ,new ArrayList<Flavor>()));
 //////
-//////      
+//////
 ////
 ////        loadProducts();
 ////
