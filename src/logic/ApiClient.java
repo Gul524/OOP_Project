@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import data.ProductData;
 import models.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -440,6 +441,7 @@ public class ApiClient {
         }
     }
 
+
     public static String deleteCategory(Integer categoryId) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/deleteCategory/" + categoryId);
@@ -468,7 +470,7 @@ public class ApiClient {
         }
     }
 
-    public static String updateCategory(Integer categoryId, String newName) {
+    public static boolean updateCategory(Integer categoryId, String newName) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/products/updateCategory/" + categoryId + "/" + newName);
             request.addHeader("Content-Type", "application/json");
@@ -482,19 +484,78 @@ public class ApiClient {
                 ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
                 if (responseModel.isSuccess()) {
                     System.out.println(responseModel.getMessage());
-                    return responseModel.getMessage();
+                    return true;
                 } else {
                     System.out.println(responseModel.getErrorCause());
-                    return (responseModel.getMessage() + " \nCause :" + responseModel.getErrorCause());
+                    return false;
                 }
             } else {
                 System.out.println("Failed to Update Category");
-                return "Failed to Update Category";
+                return false;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static boolean deleteInventory(Integer inventoryId) {
+        try {
+            var request = new HttpDelete(_baseURL + "/resApi/deleteInventory/"+ inventoryId.toString());
+            request.addHeader("Content-Type", "application/json");
+            // request.addHeader("Authorization", "Bearer " + bearerToken); // Uncomment if needed
+
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return true;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return false;
+                }
+            } else {
+                System.out.println("Failed to Delete Inventory");
+                return false;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean updateInventory(Integer id , Inventory quantity) {
+        try {
+            var request = new HttpPost(_baseURL + "/resApi/updateInventory/"+id.toString()+"/quantity=/"+quantity.toString());
+            request.addHeader("Content-Type", "application/json");
+            // request.addHeader("Authorization", "Bearer " + bearerToken); // Uncomment if needed
+
+            CloseableHttpResponse response = _httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode >= 200 && statusCode <= 300) {
+                String jsonResponse = EntityUtils.toString(response.getEntity());
+                ApiResponseModel<String> responseModel = _mapper.readValue(jsonResponse, ApiResponseModel.class);
+                if (responseModel.isSuccess()) {
+                    System.out.println(responseModel.getMessage());
+                    return true;
+                } else {
+                    System.out.println(responseModel.getErrorCause());
+                    return false;
+                }
+            } else {
+                System.out.println("Failed to Update Inventory Quantity");
+                return false;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+           }
+
+
+
 
     public static List<Inventory> loadInventory() {
         try {
