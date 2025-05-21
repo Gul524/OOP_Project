@@ -14,12 +14,15 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 @Data
 public class Inventory {
+    
     @JsonProperty(access = WRITE_ONLY)
-    public int id;
+    public int id; 
     public String name;
+    public int quantity;
 
-    public Inventory(String name){
+    public Inventory(String name, int qty){
         this.name = name;
+        this.quantity = qty;
 
     }
 }

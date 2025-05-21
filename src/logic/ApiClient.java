@@ -366,7 +366,7 @@ public class ApiClient {
 
     public static boolean storeInventory(Inventory inventory) {
         try {
-            var request = new HttpPost(_baseURL + "/resApi/addEmployee");
+            var request = new HttpPost(_baseURL + "/resApi/addInventory");
             request.addHeader("Content-Type", "application/json");
 //           request.addHeader("Authorization", "Bearer " + bearerToken);
             String jsonBody;
