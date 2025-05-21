@@ -363,14 +363,14 @@ public class ApiClient {
         }
     }
 
-    public static boolean storeInventory(List<Staff> staff) {
+    public static boolean storeInventory(Inventory inventory) {
         try {
             var request = new HttpPost(_baseURL + "/resApi/addEmployee");
             request.addHeader("Content-Type", "application/json");
 //           request.addHeader("Authorization", "Bearer " + bearerToken);
             String jsonBody;
             try {
-                jsonBody = _mapper.writeValueAsString(staff);
+                jsonBody = _mapper.writeValueAsString(inventory);
             } catch (Exception e) {
                 System.out.println("Error serializing JSON: " + e.getMessage());
                 System.out.println("Error serializing JSON: " + e.getMessage());
@@ -394,7 +394,7 @@ public class ApiClient {
                     return false;
                 }
             } else {
-                System.out.println("Failed to Save staff");
+                System.out.println("Failed to Save Inventory");
                 return false;
 
             }
@@ -498,7 +498,7 @@ public class ApiClient {
 
     public static List<Inventory> loadInventory() {
         try {
-            var request = new HttpGet(_baseURL + "/resApi/inventoryLog");
+            var request = new HttpGet(_baseURL + "/resApi/inventory");
 //            request.addHeader();
             CloseableHttpResponse response = _httpClient.execute(request);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -526,7 +526,7 @@ public class ApiClient {
                     return null;
                 }
             } else {
-                System.out.println("Failed to Load Order");
+                System.out.println("Failed to Load Inventory");
                 return null;
             }
         } catch (Exception e) {
