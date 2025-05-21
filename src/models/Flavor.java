@@ -13,8 +13,13 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 @Data
 public class Flavor {
+
     @JsonProperty(access = WRITE_ONLY)
     public int id;
     public Integer productId;
     public String name;
+
+    public Flavor(String name) {
+        this.name = name;
+    }
 }
